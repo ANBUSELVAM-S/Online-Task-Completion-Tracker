@@ -9,15 +9,16 @@
 
 /* Main Content */
 .main-content {
-  flex: 1;
   padding: 20px;
+  
 }
 
 /* Navbar */
 .navbar {
   display: flex;
   justify-content: space-between;
-  margin-bottom: 30px;
+  margin-bottom: 10px;
+  
 }
 
 /* Cards */
@@ -42,115 +43,6 @@
   font-size: 24px;
   font-weight: bold;
 }
-/* Center the form on page */
-body, html {
-  height: 100%;
-  margin: 0;
-  font-family: Arial, sans-serif;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  background: #0f172a;
-}
-
-/* Form card */
-form {
-  background: white;
-  padding: 30px 25px;
-  border-radius: 12px;
-  width: 740px;
-  box-shadow: 0 15px 30px rgba(0,0,0,0.2);
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-}
-
-/* Heading inside form */
-form h2 {
-  margin-bottom: 20px;
-  color: #4f46e5;
-}
-
-/* Labels */
-form label {
-  display: block;
-  margin-top: 10px;
-  font-weight: 600;
-  width: 100%;
-  text-align: left;
-  color: #333;
-}
-
-/* Inputs and textarea */
-form input,
-form textarea {
-  width: 100%;
-  padding: 10px;
-  margin-top: 5px;
-  border-radius: 8px;
-  border: 1px solid #ccc;
-  outline: none;
-  transition: 0.3s;
-}
-
-form input:focus,
-form textarea:focus {
-  border-color: #4f46e5;
-  box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.2);
-}
-
-/* Button */
-form button {
-  margin-top: 20px;
-  padding: 12px;
-  width: 100%;
-  border-radius: 25px;
-  background: linear-gradient(135deg, #4f46e5, #4338ca);
-  color: white;
-  font-size: 16px;
-  border: none;
-  cursor: pointer;
-  transition: 0.3s;
-}
-
-form button:hover {
-  opacity: 0.9;
-  transform: translateY(-2px);
-}
-
-/* Task list */
-ul {
-  margin-top: 25px;
-  width: 100%;
-  padding: 0;
-  list-style: none;
-}
-
-ul li {
-  background: #0450e9;
-  color: white;
-  padding: 10px 12px;
-  border-radius: 8px;
-  margin-bottom: 8px;
-  font-size: 14px;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-}
-
-/* Optional: icon style */
-ul li::before {
-  content: "📝";
-  margin-right: 8px;
-}
-
-/* Responsive for small screens */
-@media (max-width: 450px) {
-  form {
-    width: 90%;
-    padding: 20px;
-  }
-}
 
 /* Sidebar stays the same */
 .sidebar {
@@ -162,75 +54,81 @@ ul li::before {
   cursor: pointer;
   position: relative;
 }
-.first{
-    
-  background: white;
-  padding: 30px 25px;
-  border-radius: 12px;
-  width: 780px;
-  box-shadow: 0 15px 30px rgba(0,0,0,0.2);
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-}
 
 
-/* Responsive layout for tablets and mobile */
-@media (max-width: 824px) {
-  .dashboard {
-    flex-direction: column; 
-    /* stack sidebar and main content */
+/* ================= RESPONSIVE ONLY ================= */
+
+/* Tablet */
+@media (max-width: 1024px) {
+  .cards {
+    flex-wrap: wrap;
+    justify-content: center;
   }
 
-  .sidebar {
-    width: 100%;
-    height: auto;
-    display: flex;
-    justify-content: space-around;
-    padding: 15px;
-  }
-
-  .main-content {
-    width: 100%;
-    padding: 20px;
-    align-items: center; /* keep form centered in column layout */
-  }
-
-  form, .first {
-    width: 90%; /* fit smaller screen */
-  }
-}
-
-@media (max-width: 768px) {
-  .sidebar {
+  .chart-box {
     flex-direction: column;
     align-items: center;
   }
 
-  .sidebar ul li {
-    margin-bottom: 10px;
-    text-align: center;
+  .chart-title {
+    width: 90%;
+  }
+}
+
+/* Mobile */
+@media (max-width: 768px) {
+  .dashboard {
+    flex-direction: column;
   }
 
   .cards {
     flex-direction: column;
-    gap: 15px;
+    align-items: center;
   }
 
-  form, .first {
-    width: 95%; /* almost full width on mobile */
-    padding: 20px;
+  .card {
+    width: 80%;
+  }
+
+  .chart-box {
+    flex-direction: column;
+    gap: 20px;
+  }
+
+  .chart-title {
+    width: 100%;
   }
 }
 
-@media (max-width: 450px) {
+/* Small Mobile */
+@media (max-width: 480px) {
+  .main-content {
+    padding: 10px;
+    
+  }
+
   form, .first {
     width: 100%;
-    padding: 15px;
+  }
+
+  .card p {
+    font-size: 20px;
   }
 
   ul li {
     font-size: 12px;
-    padding: 8px 10px;
   }
+}
+
+
+.chart-box {
+  display: flex;
+  justify-content: space-around;
+  margin-top: 50px;
+}
+.piedata{
+  text-align: center;
+}
+.chart-title {
+  width: 300px;
 }

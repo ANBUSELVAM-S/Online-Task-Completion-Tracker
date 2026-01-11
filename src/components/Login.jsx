@@ -1,6 +1,7 @@
 import { useState } from "react";
 import "../styles/Login.css";
 import { useNavigate } from "react-router-dom";
+import { GoogleLogin } from "@react-oauth/google";
 
 function Login() {
   const [email, setEmail] = useState("");
@@ -55,7 +56,7 @@ function Login() {
         />
 
         <button type="submit">Login</button>
-        
+       
       </form>
     </div>
   );

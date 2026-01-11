@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import Sidebar from "./Sidebar";
+import "../styles/Task.css";
 
 function Task() {
   const [date, setDate] = useState("");
@@ -10,9 +11,8 @@ function Task() {
 
   useEffect(() => {
     const storedUserId = localStorage.getItem("user_id");
-
     if (storedUserId) {
-      setUserId(Number(storedUserId)); // ✅ FIX
+      setUserId(Number(storedUserId));
     }
   }, []);
 
@@ -36,7 +36,7 @@ function Task() {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          user_id: userId, // ✅ now number
+          user_id: userId,
           date,
           time,
           description
@@ -50,7 +50,6 @@ function Task() {
         setDate("");
         setTime("");
         setDescription("");
-        
       } else {
         alert("❌ " + result.message);
       }
@@ -65,22 +64,21 @@ function Task() {
   return (
     <div className="dashboard">
       <Sidebar />
-      <div style={{ padding: "20px", maxWidth: "800px" }}>
+      <div className="task-container">
         <h2>➕ Add New Task</h2>
 
-        <p style={{ color: "green" }}>👤 User ID: {userId}</p>
+        <p className="user-id">👤 User ID: {userId}</p>
 
-        <form onSubmit={handleSubmit}>
-          <input type="date" style={{height:"2rem"}} value={date} onChange={e => setDate(e.target.value)} required />
-          <input type="time" style={{height:"2rem"}} value={time} onChange={e => setTime(e.target.value)} required />
+        <form className="task-form" onSubmit={handleSubmit}>
+          <input type="date" value={date} onChange={e => setDate(e.target.value)} required />
+          <input type="time" value={time} onChange={e => setTime(e.target.value)} required />
           <textarea
             placeholder="Task description"
-            style={{height:"2rem"}}
             value={description}
             onChange={e => setDescription(e.target.value)}
             required
           />
-          <button type="submit" disabled={loading} style={{height:"3rem",borderRadius:"8px",cursor:"pointer"}}>
+          <button type="submit" disabled={loading}>
             {loading ? "Adding..." : "Add Task"}
           </button>
         </form>

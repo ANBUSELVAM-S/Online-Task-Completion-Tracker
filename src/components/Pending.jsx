@@ -1,5 +1,7 @@
 import { useState, useEffect } from "react";
 import Sidebar from "./Sidebar";
+import "../styles/Pending.css";
+
 
 function Pending() {
   const [tasks, setTasks] = useState([]);
@@ -66,72 +68,47 @@ function Pending() {
     <div className="dashboard">
       <Sidebar />
 
-      <div style={{ padding: "20px",maxWidth: "790px" }}>
-        <h1 style={{ textAlign: "center" }}>📋 Pending Tasks</h1>
+      <div className="pending-container">
+  <h1 className="pending-title">📋 Pending Tasks</h1>
 
-        {loading ? (
-          <p style={{ textAlign: "center" }}>Loading...</p>
-        ) : tasks.length === 0 ? (
-          <div style={{ padding: "50px", textAlign: "center",maxWidth: "740px" }}>
-            <p>No pending tasks 🎉</p>
-            <p style={{ fontSize: "14px" }}>
-              Add tasks from <strong>Task</strong> page
-            </p>
+  {loading ? (
+    <p className="loading-text">Loading...</p>
+  ) : tasks.length === 0 ? (
+    <div className="empty-box">
+      <p>No pending tasks 🎉</p>
+      <p className="empty-sub">
+        Add tasks from <strong>Task</strong> page
+      </p>
+    </div>
+  ) : (
+    <ul className="task-list">
+      {tasks.map(task => (
+        <li key={task.id} className="task-card">
+          
+          <div className="task-datetime">
+            Now: 📅 {todayDate} ⏰ {currentTime}
           </div>
-        ) : (
-          <ul style={{ listStyle: "none", padding: 0,maxWidth: "800px" }}>
-            {tasks.map(task => (
-              <li
-                key={task.id}
-                style={{
-                  padding: "10px", margin: "10px 0", width: "97%", background: "linear-gradient(135deg, #667eea 0%, #764ba2 100%)", color: "white", borderRadius: "12px", boxShadow: "0 8px 25px rgba(0,0,0,0.15)", borderLeft: "5px solid #fff"
-                }}
-              >
 
-                {/* Current date/time */}
-                <div style={{ fontSize: "13px",width: "740px" }}>
-                  Now: 📅 {todayDate} ⏰ {currentTime}
-                </div>
+          <div className="task-desc">
+            {task.description}
+          </div>
 
-                {/* Description */}
-                <div style={{ fontSize: "15px",marginRight: "5rem",width:"45rem" }}>
-                  {task.description}
-                </div>
+          <div className="task-actions">
+            <button className="btn-complete" onClick={() => completeTask(task.id)}>
+              ✅ Completed
+            </button>
 
-                {/* Actions */}
-                <button
-                  onClick={() => completeTask(task.id)}
-                  style={{
-                    background: "green",
-                    color: "white",
-                    border: "none",
-                    padding: "6px 12px",
-                    borderRadius: "6px",
-                    marginRight: "10px",
-                    cursor: "pointer"
-                  }}
-                >
-                  ✅ Completed
-                </button>
+            <button className="btn-delete" onClick={() => deleteTask(task.id)}>
+              🗑 Delete
+            </button>
+          </div>
 
-                <button
-                  onClick={() => deleteTask(task.id)}
-                  style={{
-                    background: "red",
-                    color: "white",
-                    border: "none",
-                    padding: "6px 12px",
-                    borderRadius: "6px",
-                    cursor: "pointer"
-                  }}
-                >
-                  🗑 Delete
-                </button>
-              </li>
-            ))}
-          </ul>
-        )}
-      </div>
+        </li>
+      ))}
+    </ul>
+  )}
+</div>
+
     </div>
   );
 }
