@@ -99,7 +99,7 @@ const closePopup = () => {
       </p>
     </div>
   ) : (
-    <ul className="task-list">
+    <ul className="task-list" style={{ height: "80vh", overflowY: "auto" }}>
       {tasks.map(task => (
         <li
   key={task.id}
@@ -161,6 +161,32 @@ const closePopup = () => {
       <button className="btn-close" onClick={closePopup}>
         Close
       </button>
+      <div className="task-actions">
+  <button
+    className="btn-complete"
+    onClick={(e) => {
+      e.stopPropagation();
+      completeTask(selectedTask.id);
+      closePopup();
+    }}
+  >
+    ✅ Completed
+  </button>
+
+  {role === "admin" && (
+    <button
+      className="btn-delete"
+      onClick={(e) => {
+        e.stopPropagation();
+        deleteTask(selectedTask.id);
+        closePopup();
+      }}
+    >
+      ❌ Delete
+    </button>
+  )}
+</div>
+
 
     </div>
   </div>

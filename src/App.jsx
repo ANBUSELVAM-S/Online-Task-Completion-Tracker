@@ -4,6 +4,7 @@ import DashboardPage from "./pages/DashboardPage";
 import TaskPage from "./pages/TaskPage";
 import PendingPage from "./pages/PendingPage";
 import AdminRoute from "./components/AdminRoute";
+import Completed from "./components/Completed";
 
 function App() {
   return (
@@ -23,6 +24,7 @@ function App() {
         />
 
         <Route path="/Pending" element={<PendingPage />} />
+        <Route path="/Completed" element={<Completed />} />
       </Routes>
     </BrowserRouter>
   );

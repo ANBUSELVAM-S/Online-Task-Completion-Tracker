@@ -3,6 +3,7 @@
 
 .task-container{
   padding: 20px;
+  width: 51rem;
   background-color: rgb(255, 252, 252);
   
 }
@@ -109,7 +110,6 @@ ul li {
 
 /* Optional: icon style */
 ul li::before {
-  content: "📝";
   margin-right: 8px;
 }
 

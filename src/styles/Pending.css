@@ -1,4 +1,5 @@
 /* ================= PAGE LAYOUT ================= */
+
 .dashboards {
   display: flex;
   min-height: 100vh;
@@ -7,6 +8,7 @@
 
 .pending-container {
   flex: 1;
+
   padding: 30px;
 }
 
@@ -17,6 +19,7 @@
 }
 
 /* ================= LOADING & EMPTY ================= */
+
 .loading-text {
   font-size: 18px;
   color: #000;
@@ -27,6 +30,7 @@
   padding: 40px;
   border-radius: 12px;
   text-align: center;
+  
   box-shadow: 0 4px 12px rgba(0,0,0,0.1);
 }
 
@@ -36,9 +40,11 @@
 }
 
 /* ================= TASK LIST ================= */
+
 .task-list {
   list-style: none;
   width: 50rem;
+  max-width: 100%;
   padding: 0;
 }
 
@@ -57,6 +63,7 @@
 }
 
 /* ================= LINE 1 → DATE + TIME + ADMIN ================= */
+
 .task-datetime {
   display: flex;
   justify-content: space-between;
@@ -64,22 +71,30 @@
   font-size: 13px;
   color: #555;
   margin-bottom: 8px;
+  gap: 10px;
+  flex-wrap: wrap;
 }
 
 /* ================= LINE 2 → DESCRIPTION ================= */
+
 .task-desc {
   font-size: 16px;
   font-weight: 500;
   color: #000;
   margin: 10px 0;
+  word-wrap: break-word;
 }
 
 /* ================= LINE 3 → BUTTONS ================= */
+
 .task-actions {
   display: flex;
   gap: 10px;
   margin-top: 10px;
+  flex-wrap: wrap;
 }
+
+/* Buttons */
 
 .btn-complete {
   background: #2ecc71;
@@ -88,6 +103,8 @@
   padding: 7px 14px;
   border-radius: 6px;
   cursor: pointer;
+  flex: 1;
+  min-width: 140px;
 }
 
 .btn-delete {
@@ -97,6 +114,8 @@
   padding: 7px 14px;
   border-radius: 6px;
   cursor: pointer;
+  flex: 1;
+  min-width: 140px;
 }
 
 .btn-complete:hover {
@@ -107,7 +126,8 @@
   background: #c0392b;
 }
 
-/* ================= POPUP OVERLAY ================= */
+/* ================= POPUP ================= */
+
 .popup-overlay {
   position: fixed;
   top: 0;
@@ -121,7 +141,6 @@
   z-index: 999;
 }
 
-/* ================= POPUP CARD ================= */
 .popup-card {
   background: #ffffff;
   width: 380px;
@@ -143,26 +162,15 @@
   }
 }
 
-.popup-card h2 {
-  margin-bottom: 15px;
-  font-size: 22px;
-}
-
-.popup-card p {
-  margin: 8px 0;
-  font-size: 15px;
-}
-
-/* ================= CLOSE BUTTON ================= */
 .btn-close {
   margin-top: 18px;
-  padding: 8px 18px;
+  padding: 10px;
   background: #333;
+  width: 100%;
   color: #fff;
   border: none;
   border-radius: 6px;
   cursor: pointer;
-  float: right;
 }
 
 .btn-close:hover {
@@ -171,26 +179,37 @@
 
 /* ================= RESPONSIVE ================= */
 
-/* Tablet & Mobile */
+/* Tablet */
+
+@media (max-width: 1024px) {
+  .task-list {
+    width: 100%;
+  }
+}
+
+/* Mobile */
+
 @media (max-width: 768px) {
+
+  .dashboards {
+    flex-direction: column;
+  }
 
   .pending-container {
     padding: 15px;
   }
 
   .pending-title {
-    font-size: 20px;
+    font-size: 22px;
   }
 
-  .task-list {
-    width: 100%;
+  .task-card {
+    padding: 14px;
   }
 
-  /* Line 1 stacks nicely */
   .task-datetime {
     flex-direction: column;
     align-items: flex-start;
-    gap: 4px;
     font-size: 12px;
   }
 
@@ -198,7 +217,6 @@
     font-size: 14px;
   }
 
-  /* Buttons full width */
   .task-actions {
     flex-direction: column;
   }
@@ -206,5 +224,22 @@
   .btn-complete,
   .btn-delete {
     width: 100%;
+  }
+}
+
+/* Small Phones */
+
+@media (max-width: 480px) {
+
+  .pending-title {
+    font-size: 18px;
+  }
+
+  .task-desc {
+    font-size: 13px;
+  }
+
+  .task-card {
+    padding: 10px;
   }
 }
