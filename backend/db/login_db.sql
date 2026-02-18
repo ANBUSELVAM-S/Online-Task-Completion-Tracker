@@ -30,7 +30,7 @@ CREATE TABLE tasks (
 
 -- Insert admin user (password: "admin123" - hashed with bcrypt)
 INSERT INTO users (email, password,role) VALUES 
-("admin@gmail.com", "$2b$10$GV7lIqJw5RbH8dBxaPYHJe2k8tFaNyo4paov2V8XLLk7fw7M8t4GG","admin");
+("taskmanager@gmail.com", "$2b$10$Np8LnLiNDJ.P/pmlKWw2W.5MNimZVPDLikyuGaw9eUpZRC4oPJuwy","admin");
 
 -- Insert sample tasks for admin user (id=1)
 INSERT INTO tasks (user_id, date, time, description) VALUES 

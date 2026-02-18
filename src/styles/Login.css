@@ -1,48 +1,106 @@
+/* ================= LOGIN PAGE ================= */
 .login-container {
   height: 100vh;
+  width: 560px;
   display: flex;
   justify-content: center;
   align-items: center;
   background: #0f172a;
+  font-family: 'Poppins', sans-serif;
 }
 
+/* Login Box */
 .login-box {
-  width: 340px;
-  padding: 30px;
-  background: #1b2f5d   ;
-  border-radius: 10px;
-  color: white;
-}
-
-.login-box h2 {
+  width: 360px;
+  padding: 40px 30px;
+  background: rgba(255, 255, 255, 0.05);
+  backdrop-filter: blur(10px);
+  border-radius: 15px;
+  color: #fff;
+  box-shadow: 0 15px 40px rgba(0, 0, 0, 0.5);
   text-align: center;
-  margin-bottom: 20px;
+  transition: all 0.3s ease;
 }
 
+.login-box:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.6);
+}
+
+/* Heading */
+.login-box h2 {
+  font-size: 26px;
+  font-weight: 600;
+  margin-bottom: 25px;
+  color: #fff;
+}
+
+/* Inputs */
 .login-box input {
   width: 100%;
-  padding: 12px;
+  padding: 14px 12px;
   margin-bottom: 15px;
-  background: #334155;
-  border: none;
-  border-radius: 6px;
-  color: white;
+  border-radius: 8px;
+  border: 1px solid rgba(255,255,255,0.3);
+  background: rgba(255,255,255,0.1);
+  color: #fff;
+  font-size: 15px;
+  transition: all 0.3s ease;
 }
 
 .login-box input::placeholder {
-  color: #cbd5f5;
+  color: rgba(255, 255, 255, 0.7);
 }
 
+.login-box input:focus {
+  border-color: #4f46e5;
+  background: rgba(255,255,255,0.15);
+  outline: none;
+  box-shadow: 0 0 10px rgba(79, 70, 229, 0.3);
+}
+
+/* Button */
 .login-box button {
   width: 100%;
-  padding: 12px;
-  background:  #16a34a;
-  color: rgb(255, 255, 255);
+  padding: 14px 0;
+  margin-top: 10px;
+  border-radius: 8px;
+  background: linear-gradient(135deg, #4ac0de, #16a34a);
+  color: #fff;
+  font-size: 16px;
+  font-weight: 600;
   border: none;
-  border-radius: 6px;
   cursor: pointer;
+  transition: all 0.3s ease;
 }
 
 .login-box button:hover {
-  background: #16a34a;
+  background: linear-gradient(135deg, #50aaff, #22c55e);
+  transform: translateY(-2px);
+  box-shadow: 0 8px 20px rgba(0,0,0,0.4);
+}
+
+/* Small Text or Links */
+.login-box .small-text {
+  margin-top: 12px;
+  font-size: 14px;
+  color: rgba(255,255,255,0.7);
+}
+
+/* Responsive */
+@media (max-width: 480px) {
+  .login-box {
+    width: 90%;
+    padding: 30px 20px;
+  }
+
+  .login-box h2 {
+    font-size: 22px;
+  }
+
+  .login-box input,
+  .login-box button {
+    font-size: 14px;
+    padding: 12px;
+  }
 }

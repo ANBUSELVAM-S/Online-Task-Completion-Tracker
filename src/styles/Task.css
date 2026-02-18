@@ -1,10 +1,13 @@
 .task-container{
   padding: 20px;
-  width: 51rem;
+  width: 72.2rem;
+  height: 90%;
   overflow-y: auto;
-  overflow-x: hidden;
   background-color: rgb(255, 252, 252);
   
+}
+.task-container::-webkit-scrollbar {
+  display: none; /* Chrome, Safari, Opera */
 }
 .option{
   width: 103%;
@@ -25,6 +28,7 @@ form {
   gap:10px;
   border-radius: 12px;
   width: 700px;
+  margin-left: 10rem;
   box-shadow: 0 15px 30px rgba(0,0,0,0.2);
   display: flex;
   flex-direction: column;
@@ -34,6 +38,7 @@ form {
 /* Heading inside form */
 form h2 {
   margin-bottom: 20px;
+  
   color: #4f46e5;
 }
 
@@ -46,7 +51,13 @@ form label {
   text-align: left;
   color: #333;
 }
-
+.task-heading{
+  font-size: 24px;
+  font-weight: 700;
+  margin-bottom: 30px;
+  padding-left: 10rem;
+  color: #000000;
+}
 /* Inputs and textarea */
 form input,
 form textarea {
@@ -145,6 +156,7 @@ ul li::before {
 @media (max-width: 450px) {
   .task-container {
     width: 100%;
+    display: flex;
     transition: left 0.3s ease-in-out;
     
   }

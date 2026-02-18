@@ -130,7 +130,7 @@ function Task() {
     <div className="dashboard" style={{height:"97.5vh"}}>
       <Sidebar />
       <div className="task-container">
-        <h2>➕ Assign New Task</h2>
+        <h2 className="task-heading">➕ Assign New Task</h2>
 
         <form className="task-form" onSubmit={handleSubmit}>
           <select className="option" value={assignedTo} onChange={e => setAssignedTo(e.target.value)} required>
@@ -153,7 +153,7 @@ function Task() {
           </button>
         </form>
 
-        <h2 style={{ marginTop: "2rem" }}>👤 Add New User</h2>
+        <h2 className="task-heading" >👤 Add New User</h2>
         <form className="task-form" onSubmit={handleAddUser}>
           <input
             type="email"

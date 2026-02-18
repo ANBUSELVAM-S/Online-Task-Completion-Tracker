@@ -99,7 +99,7 @@ const closePopup = () => {
       </p>
     </div>
   ) : (
-    <ul className="task-list" style={{ height: "80vh", overflowY: "auto" }}>
+    <ul className="task-list">
       {tasks.map(task => (
         <li
   key={task.id}

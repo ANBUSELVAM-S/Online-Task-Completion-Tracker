@@ -31,7 +31,7 @@ function Sidebar() {
       {/* Sidebar */}
       <div className={`sidebar ${open ? "open" : ""}`} style={{height:"93.5vh"}}>
         <ul>
-          <h2>TaskManager</h2>
+          <h2 className="manager">TaskManager</h2>
           <li onClick={() => navigate("/dashboard")}><DashboardIcon style={{ fontSize: 20,paddingRight:"4rem" }} /> Dashboard</li>
           <li onClick={() => navigate("/Task")}><AssignmentIcon style={{ fontSize: 20,paddingRight:"6rem" }} /> Tasks</li>
           <li onClick={() => navigate("/Completed")}><AddTaskIcon style={{ fontSize: 20,paddingRight:"4rem" }} /> Completed</li>

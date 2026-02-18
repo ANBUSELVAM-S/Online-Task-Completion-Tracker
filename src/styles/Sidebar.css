@@ -5,39 +5,58 @@ body, html {
   background: #0f172a;
 }
 .sidebar {
-    display: flex;
-  width: 320px;
-  height: 93.5vh;
-  background: #1e293b;
-  color: white;
-  padding: 20px;
-  transition: 0.3s;
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 220px;
+  height: 100vh;
+  background: linear-gradient(180deg, #1e293b, #0f172a);
+  color: #fff;
+  padding: 25px 20px;
+  box-shadow: 2px 0 15px rgba(0,0,0,0.1);
+  transition: transform 0.3s ease-in-out;
+  z-index: 1000;
 }
-
 .sidebar ul {
   list-style: none;
   padding: 0;
+  margin: 0;
 }
 
+
 .sidebar li {
-  padding: 12px;
+  padding: 12px 15px;
+  margin-bottom: 10px;
+  border-radius: 8px;
+  font-size: 16px;
   cursor: pointer;
+  transition: all 0.3s ease;
 }
 
 .sidebar li:hover {
   background: #334155;
+  transform: translateX(5px);
 }
 
-/* Hamburger Button */
+/* Hamburger for mobile */
 .hamburger {
   display: none;
   font-size: 28px;
   padding: 10px 15px;
   cursor: pointer;
   background: #1e293b;
-  color: white;
+  color: #fff;
+  position: fixed;
+  top: 10px;
+  left: 10px;
+  z-index: 1100;
 }
-
+.manager{
+  font-size: 24px;
+  font-weight: 700;
+  margin-bottom: 30px;
+  text-align: center;
+}
 /* Mobile View */
 @media (max-width: 768px) {
   .hamburger {
