@@ -1,0 +1,134 @@
+/* ================= USERTASKS LAYOUT ================= */
+
+/* Two-column layout inside pending-container */
+.usertasks-layout {
+  display: flex;
+  gap: 20px;
+  align-items: flex-start;
+}
+
+/* ===== LEFT PANEL — Users list ===== */
+.usertasks-users-panel {
+  flex: 1;
+  border-right: 1px solid #ccc;
+  padding-right: 20px;
+  height: calc(100vh - 100px);
+  overflow-y: auto;
+}
+
+/* ===== RIGHT PANEL — Tasks ===== */
+.usertasks-tasks-panel {
+  flex: 2;
+  height: calc(100vh - 100px);
+  overflow-y: auto;
+}
+
+/* ===== USER LIST ITEM ===== */
+.usertasks-user-item {
+  cursor: pointer;
+  color: black;
+  background-color: white;
+  border-left: 6px solid transparent;
+  transition: border-color 0.2s ease, background-color 0.2s ease;
+}
+
+/* Active / selected user */
+.usertasks-user-active {
+  background-color: rgb(255, 255, 255);
+  border-left: 6px solid #007bff !important;
+}
+
+/* ===== TASK CARD BORDER BY STATUS ===== */
+.usertasks-border-completed {
+  border-left: 6px solid #28a745;
+}
+
+.usertasks-border-pending {
+  border-left: 6px solid #ffc107;
+}
+
+/* ===== STATUS TEXT ===== */
+.usertasks-status {
+  text-transform: capitalize;
+  font-weight: bold;
+}
+
+.usertasks-status-completed {
+  color: #28a745;
+}
+
+.usertasks-status-pending {
+  color: #ffc107;
+}
+
+/* ===== PRIORITY BADGE ===== */
+.usertasks-priority {
+  margin-top: 10px;
+  color: black;
+}
+
+/* ================= RESPONSIVE ================= */
+
+/* ===== TABLET (601px – 1024px) ===== */
+@media (max-width: 1024px) {
+  .usertasks-layout {
+    gap: 14px;
+  }
+
+  .usertasks-users-panel {
+    flex: 1;
+    padding-right: 14px;
+  }
+
+  .usertasks-tasks-panel {
+    flex: 2;
+  }
+}
+
+/* ===== MOBILE (up to 600px) ===== */
+@media (max-width: 600px) {
+  .usertasks-layout {
+    flex-direction: column;
+    gap: 0;
+  }
+
+  /* Users panel — fixed height, scrollable */
+  .usertasks-users-panel {
+    width: 100%;
+    height: auto;
+    max-height: 220px;
+    border-right: none;
+    border-bottom: 2px solid #ccc;
+    padding-right: 0;
+    padding-bottom: 12px;
+    overflow-y: auto;
+  }
+
+  /* Tasks panel — takes remaining space */
+  .usertasks-tasks-panel {
+    width: 100%;
+    height: auto;
+    padding-top: 12px;
+  }
+
+  .usertasks-users-panel .pending-title,
+  .usertasks-tasks-panel .pending-title {
+    font-size: 18px;
+    margin-bottom: 12px;
+  }
+}
+
+/* ===== SMALL MOBILE (up to 380px) ===== */
+@media (max-width: 380px) {
+  .usertasks-users-panel {
+    max-height: 180px;
+  }
+
+  .usertasks-status {
+    font-size: 13px;
+  }
+
+  .usertasks-priority {
+    font-size: 12px;
+  }
+}

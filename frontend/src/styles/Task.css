@@ -1,0 +1,413 @@
+.task-container{
+  padding: 20px;
+  width: 76rem;
+  height: 90%;
+  overflow-y: auto;
+  background-color: rgb(255, 252, 252);
+  
+}
+.task-container::-webkit-scrollbar {
+  display: none; /* Chrome, Safari, Opera */
+}
+.option{
+  width: 103%;
+  padding: 10px;
+  margin-top: 5px;
+  border-radius: 8px;
+  border: 2px solid #ccc;
+  outline: none;
+  transition: 0.3s;
+}
+  
+
+/* Form card */
+form {
+  background: rgb(255, 255, 255);
+  padding: 30px 25px;
+  margin: 2rem;
+  gap:10px;
+  border-radius: 12px;
+  width: 700px;
+  margin-left: 10rem;
+  box-shadow: 0 15px 30px rgba(0,0,0,0.2);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+/* Heading inside form */
+form h2 {
+  margin-bottom: 20px;
+  
+  color: #4f46e5;
+}
+
+/* Labels */
+form label {
+  display: block;
+  margin-top: 10px;
+  font-weight: 600;
+  width: 100%;
+  text-align: left;
+  color: #333;
+}
+.task-heading{
+  font-size: 24px;
+  font-weight: 700;
+  margin-bottom: 30px;
+  padding-left: 10rem;
+  color: #000000;
+}
+/* Inputs and textarea */
+form input,
+form textarea {
+  width: 100%;
+  padding: 10px;
+  margin-top: 5px;
+  border-radius: 8px;
+  border: 2px solid #ccc;
+  outline: none;
+  transition: 0.3s;
+}
+
+form input:focus,
+form textarea:focus {
+  border-color: #4f46e5;
+  box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.2);
+}
+
+/* Button */
+form button {
+  margin-top: 20px;
+  padding: 12px;
+  width: 100%;
+  border-radius: 25px;
+  background: linear-gradient(135deg, #4f46e5, #4338ca);
+  color: white;
+  font-size: 16px;
+  border: none;
+  cursor: pointer;
+  transition: 0.3s;
+}
+
+form button:hover {
+  opacity: 0.9;
+  transform: translateY(-2px);
+}
+ textarea{
+  height:10rem;
+}
+
+/* Task list */
+ul {
+  margin-top: 25px;
+  width: 100%;
+  padding: 0;
+  list-style: none;
+}
+
+ul li {
+  background: #0450e9;
+  color: white;
+  padding: 10px 12px;
+  border-radius: 8px;
+  margin-bottom: 8px;
+  font-size: 14px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+/* Optional: icon style */
+ul li::before {
+  margin-right: 8px;
+}
+
+/* ================================================
+   HAMBURGER BUTTON — hidden on desktop by default
+   ================================================ */
+
+.hamburger-btn {
+  display: none;
+  flex-direction: column;
+  justify-content: center;
+  gap: 5px;
+  cursor: pointer;
+  background: none;
+  border: none;
+  padding: 6px;
+  z-index: 1100;
+}
+
+.hamburger-btn span {
+  display: block;
+  width: 26px;
+  height: 3px;
+  background-color: white;
+  border-radius: 3px;
+  transition: all 0.3s ease;
+}
+
+/* Hamburger → X animation when sidebar is open */
+.hamburger-btn.open span:nth-child(1) {
+  transform: translateY(8px) rotate(45deg);
+}
+
+.hamburger-btn.open span:nth-child(2) {
+  opacity: 0;
+  transform: scaleX(0);
+}
+
+.hamburger-btn.open span:nth-child(3) {
+  transform: translateY(-8px) rotate(-45deg);
+}
+
+/* Overlay backdrop */
+.sidebar-overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.5);
+  z-index: 900;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.sidebar-overlay.visible {
+  display: block;
+  opacity: 1;
+}
+
+/* ================================================
+   RESPONSIVE BREAKPOINTS
+   ================================================ */
+
+/* ===== TABLET (601px – 1024px) ===== */
+@media (min-width: 601px) and (max-width: 1024px) {
+  .task-container {
+    width: 100%;
+    padding: 20px;
+    box-sizing: border-box;
+  }
+
+  form {
+    width: 80%;
+    max-width: 600px;
+    margin: 2rem auto;
+    box-sizing: border-box;
+  }
+
+  .task-heading {
+    padding-left: 2rem;
+    font-size: 22px;
+  }
+
+  .option {
+    width: 100%;
+    box-sizing: border-box;
+  }
+
+  ul li {
+    font-size: 13px;
+    padding: 10px;
+  }
+}
+
+/* ===== MOBILE (up to 600px) ===== */
+@media (max-width: 600px) {
+
+  /* --- Dashboard wrapper --- */
+  .dashboard,
+  .dashboards {
+    flex-direction: column;
+    height: auto;  
+    min-height: 100vh;
+    overflow-x: hidden; /* ✅ stop page-level horizontal scroll */
+  }
+
+  /* --- Top navbar bar (full width) --- */
+  .task-navbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
+    background: #1e293b;
+    padding: 0.75rem 1rem;
+    box-sizing: border-box;
+    position: sticky;
+    top: 0;
+    z-index: 800;
+  }
+
+  /* --- Show hamburger button --- */
+  .hamburger-btn {
+    display: flex;
+  }
+
+  /* --- Sidebar slides in from left as overlay --- */
+  .sidebar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 260px;
+    height: 100vh;
+    min-height: 100vh;
+    background: #1e293b;
+    padding: 20px;
+    z-index: 1000;
+    transform: translateX(-100%);
+    transition: transform 0.3s ease;
+    overflow-y: auto;
+  }
+
+  .sidebar.open {
+    transform: translateX(0);
+  }
+
+  .sidebar-overlay {
+    display: block;
+  }
+
+  /* ✅ KEY FIX — container fits screen */
+  .task-container {
+    width: 100%;
+    max-width: 100%;
+    padding: 15px;
+    height: auto;
+    box-sizing: border-box;
+    overflow-x: hidden;
+    margin-top: 0;
+  }
+
+  /* ✅ KEY FIX — form fits screen, no overflow */
+  form {
+    width: 100%;
+    max-width: 100%;
+    margin: 1rem auto;
+    padding: 20px 15px;
+    box-sizing: border-box;
+  }
+
+  /* ✅ KEY FIX — inputs stay within form */
+  form input,
+  form textarea {
+    width: 100%;
+    max-width: 100%;
+    box-sizing: border-box;
+  }
+
+  /* --- Task heading --- */
+  .task-heading {
+    font-size: 20px;
+    padding-left: 1rem;
+    margin-bottom: 20px;
+  }
+
+  /* ✅ KEY FIX — option select fits screen */
+  .option {
+    width: 100%;
+    max-width: 100%;
+    box-sizing: border-box;
+  }
+
+  /* --- Textarea --- */
+  textarea {
+    height: 8rem;
+    box-sizing: border-box;
+  }
+
+  /* --- Button --- */
+  form button {
+    padding: 14px;
+    font-size: 15px;
+    box-sizing: border-box;
+  }
+
+  /* ✅ KEY FIX — ul list fits screen */
+  ul {
+    width: 100%;
+    max-width: 100%;
+    box-sizing: border-box;
+    padding: 0;
+  }
+
+  /* ✅ KEY FIX — list items fit screen */
+  ul li {
+    width: 100%;
+    max-width: 100%;
+    font-size: 14px;
+    padding: 12px;
+    margin: 0 auto 8px;
+    flex-direction: row;
+    box-sizing: border-box;
+    word-break: break-word;    /* ✅ long text wraps */
+    overflow-wrap: break-word;
+  }
+}
+
+/* ===== SMALL MOBILE (361px – 480px) ===== */
+@media (max-width: 480px) and (min-width: 361px) {
+  .task-container {
+    padding: 10px;
+  }
+
+  form {
+    width: 100%;
+    padding: 15px;
+    box-sizing: border-box;
+  }
+
+  .task-heading {
+    font-size: 18px;
+    padding-left: 0.5rem;
+  }
+
+  .sidebar {
+    width: 240px;
+  }
+}
+
+/* ===== EXTRA SMALL MOBILE (up to 360px) ===== */
+@media (max-width: 360px) {
+  .task-container {
+    padding: 8px;
+  }
+
+  form {
+    padding: 12px 10px;
+    box-sizing: border-box;
+  }
+
+  .task-heading {
+    font-size: 16px;
+    padding-left: 0.5rem;
+  }
+
+  form input,
+  form textarea,
+  .option {
+    padding: 10px;
+    font-size: 14px;
+    box-sizing: border-box;
+  }
+
+  ul li {
+    padding: 10px;
+    font-size: 13px;
+  }
+
+  .sidebar {
+    width: 220px;
+  }
+}
+
+/* ===== LANDSCAPE MOBILE ===== */
+@media (max-height: 500px) and (orientation: landscape) {
+  .task-container {
+    padding: 10px;
+  }
+
+  textarea {
+    height: 6rem;
+  }
+}
