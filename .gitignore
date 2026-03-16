@@ -23,31 +23,9 @@ dist-ssr
 *.sln
 *.sw?
 
-# TaskManage App
-
-A full-stack task management application built with:
-
-- Frontend: React + Vite
-- Backend: Node.js + Express
-- Database: MySQL
-
----
-
-## 🚀 Features
-
-- User authentication
-- Task creation & management
-- Admin / User roles
-- Task status tracking
-
----
-
-## 🛠 Tech Stack
-
-Frontend:
-- React
-- Vite
-- CSS
+# Environment variables
+.env
+backend/.env
 
 Backend:
 - Node.js
