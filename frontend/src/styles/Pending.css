@@ -79,12 +79,34 @@
 
 .search-bar {
   width: 68%;
-  padding: 12px;
-  margin: 0 auto 20px auto;
-  display: block;
+  padding: 15px;
   border-radius: 8px;
   border: 1px solid #ccc;
-  font-size: 1rem;  
+  font-size: 1rem;
+}
+
+.priority-filter {
+  flex: 0 0 180px;
+  padding: 12px;
+  border-radius: 8px;
+  border: 1px solid #ccc;
+  font-size: 1rem;
+  background: #ffffff;
+}
+
+.time-remaining {
+  margin-left: auto;
+  font-weight: 600;
+  font-size: 0.9rem;
+  color: #334155;
+}
+
+.controls {
+  display: flex;
+  justify-content: center;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin-bottom: 20px;
 }
 
 /* ================= TASK DETAILS ================= */

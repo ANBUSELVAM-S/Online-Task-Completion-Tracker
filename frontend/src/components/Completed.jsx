@@ -8,6 +8,7 @@ function Completed() {
   const [selectedTask, setSelectedTask] = useState(null);
   const [showPopup, setShowPopup] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
+  const [priorityFilter, setPriorityFilter] = useState("all");
 
   const role = localStorage.getItem("role");
   const token = localStorage.getItem("token");
@@ -61,11 +62,32 @@ function Completed() {
     setTasks(tasks.filter(task => task.id !== id));
   };
 
-  // 🔍 Filter Tasks based on Search
-  const filteredTasks = tasks.filter(task => 
-    task.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    (task.assigned_user && task.assigned_user.toLowerCase().includes(searchTerm.toLowerCase()))
-  );
+  // ⏱ Time remaining until deadline
+  const getTimeRemaining = (date, time) => {
+    const deadline = new Date(`${date}T${time}`);
+    const now = new Date();
+    const diffMs = deadline - now;
+
+    const absMs = Math.abs(diffMs);
+    const hours = Math.floor(absMs / (1000 * 60 * 60));
+    const minutes = Math.floor((absMs % (1000 * 60 * 60)) / (1000 * 60));
+
+    const formatted = `${hours}h ${minutes}m`;
+    
+  };
+
+  // 🔍 Filter Tasks based on Search + Priority
+  const filteredTasks = tasks.filter(task => {
+    const matchesSearch =
+      task.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      (task.assigned_user && task.assigned_user.toLowerCase().includes(searchTerm.toLowerCase()));
+
+    const matchesPriority =
+      priorityFilter === "all" ||
+      task.priority?.toLowerCase() === priorityFilter;
+
+    return matchesSearch && matchesPriority;
+  });
 
   const getPriorityClass = (priority) => {
     const p = priority?.toLowerCase();
@@ -81,7 +103,28 @@ function Completed() {
 
       <div className="pending-container">
         <h1 className="pending-title">✅ {role === "admin" ? "All Completed Tasks" : "My Completed Tasks"}</h1>
-        <input type="text" placeholder="🔍 Search completed tasks..." value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} className="search-bar" />
+        
+        <div className="controls">
+          <input
+            type="text"
+            placeholder="🔍 Search completed tasks..."
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            className="search-bar"
+          />
+
+          <select
+            value={priorityFilter}
+            onChange={(e) => setPriorityFilter(e.target.value)}
+            className="priority-filter"
+            aria-label="Filter by priority"
+          >
+            <option value="all">All Priorities</option>
+            <option value="high">High Priority</option>
+            <option value="medium">Medium Priority</option>
+            <option value="low">Low Priority</option>
+          </select>
+        </div>
 
         {loading ? (
           <p className="loading-text">Loading...</p>
@@ -94,7 +137,8 @@ function Completed() {
             {filteredTasks.map(task => (
               <li key={task.id} className="task-card" onClick={() => openTaskPopup(task)}>
                 <div className="task-datetime">
-                  📅 {task.date} ⏰ {task.time}
+                  📅 {new Date(task.date).toLocaleDateString("en-IN")}
+                  <span className="time-remaining">{getTimeRemaining(task.date, task.time)}</span>
                 </div>
 
                 <div className="task-desc">

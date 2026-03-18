@@ -9,6 +9,7 @@ function Pending() {
   const [selectedTask, setSelectedTask] = useState(null);
   const [showPopup, setShowPopup] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
+  const [priorityFilter, setPriorityFilter] = useState("all");
 
   const role = localStorage.getItem("role");
   const token = localStorage.getItem("token");
@@ -89,11 +90,32 @@ const closePopup = () => {
     setTasks(tasks.filter(task => task.id !== id));
   };
 
-  // 🔍 Filter Tasks based on Search
-  const filteredTasks = tasks.filter(task => 
-    task.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    (task.assigned_user && task.assigned_user.toLowerCase().includes(searchTerm.toLowerCase()))
-  );
+  // 🔍 Filter Tasks based on Search + Priority
+  const filteredTasks = tasks.filter(task => {
+    const matchesSearch =
+      task.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      (task.assigned_user && task.assigned_user.toLowerCase().includes(searchTerm.toLowerCase()));
+
+    const matchesPriority =
+      priorityFilter === "all" ||
+      task.priority?.toLowerCase() === priorityFilter;
+
+    return matchesSearch && matchesPriority;
+  });
+
+  // ⏱ Time remaining until deadline
+  const getTimeRemaining = (date, time) => {
+    const deadline = new Date(`${date}T${time}`);
+    const now = new Date();
+    const diffMs = deadline - now;
+
+    const absMs = Math.abs(diffMs);
+    const hours = Math.floor(absMs / (1000 * 60 * 60));
+    const minutes = Math.floor((absMs % (1000 * 60 * 60)) / (1000 * 60));
+
+    const formatted = `${hours}h ${minutes}m`;
+   
+  };
 
   // ⚠️ Check if task is overdue
   const isOverdue = (date, time) => {
@@ -116,7 +138,27 @@ const closePopup = () => {
       <div className="pending-container">
   <h1 className="pending-title">📋 {role === "admin" ? "All Pending Tasks" : "My Pending Tasks"}</h1>
 
-  <input type="text" placeholder="🔍 Search by description or user..." value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} className="search-bar" />
+  <div className="controls">
+    <input
+      type="text"
+      placeholder="🔍 Search by description or user..."
+      value={searchTerm}
+      onChange={(e) => setSearchTerm(e.target.value)}
+      className="search-bar"
+    />
+
+    <select
+      value={priorityFilter}
+      onChange={(e) => setPriorityFilter(e.target.value)}
+      className="priority-filter"
+      aria-label="Filter by priority"
+    >
+      <option value="all">All Priorities</option>
+      <option value="high">High Priority</option>
+      <option value="medium">Medium Priority</option>
+      <option value="low">Low Priority</option>
+    </select>
+  </div>
 
   {loading ? (
     <p className="loading-text">Loading...</p>
@@ -143,6 +185,7 @@ const closePopup = () => {
           <div className="task-datetime">
             {overdue && <span style={{ color: "#d9534f", fontWeight: "bold", marginRight: "5px" }}>⚠️ Overdue</span>}{" "}
             📅 {new Date(task.date).toLocaleDateString("en-IN")}
+            <span className="time-remaining">{getTimeRemaining(task.date, task.time)}</span>
           </div>
 
           <div className="task-desc">
