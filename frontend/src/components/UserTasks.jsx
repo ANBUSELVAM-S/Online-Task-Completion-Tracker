@@ -73,9 +73,9 @@ function UserTasks() {
 
   if (role !== "admin") {
     return (
-      <div className="dashboards">
-        <Sidebar />
-        <div className="pending-container">
+      <div className="dashboard-layout">
+        <Sidebar className="dashboard-sidebar" />
+        <div className="dashboard-main">
           <h2>⛔ Access Denied</h2>
           <p>Only Admins can view this page.</p>
         </div>
@@ -84,23 +84,21 @@ function UserTasks() {
   }
 
   return (
-    <div className="dashboards">
-      <Sidebar />
-      <div className="pending-container usertasks-layout">
+    <div className="dashboard-layout">
+      <Sidebar className="dashboard-sidebar" />
+      <div className="dashboard-main main-flex-container">
 
         {/* Left panel — Users list */}
-        <div className="usertasks-users-panel">
-          <h1 className="pending-title">👥 Users</h1>
+        <div className="usertasks-users-panel glass-panel users-panel-wrapper">
+          <h1 className="pending-title panel-header">👥 Users</h1>
           {loadingUsers ? (
             <p className="loading-text">Loading users...</p>
           ) : (
-            <ul className="task-list">
+            <ul className="task-list users-list">
               {users.map((user) => (
                 <li
                   key={user.id}
-                  className={`task-card usertasks-user-item ${
-                    selectedUser?.id === user.id ? "usertasks-user-active" : ""
-                  }`}
+                  className={`task-card user-list-item ${selectedUser?.id === user.id ? "user-list-item-active" : "user-list-item-inactive"}`}
                   onClick={() => handleUserClick(user)}
                 >
                   {user.email}
@@ -111,8 +109,8 @@ function UserTasks() {
         </div>
 
         {/* Right panel — Tasks for selected user */}
-        <div className="usertasks-tasks-panel">
-          <h1 className="pending-title">
+        <div className="usertasks-tasks-panel glass-panel tasks-panel-wrapper">
+          <h1 className="pending-title panel-header">
             {selectedUser
               ? `Tasks for ${selectedUser.email}`
               : "Select a user to see their tasks"}
@@ -121,52 +119,43 @@ function UserTasks() {
           {loadingTasks ? (
             <p className="loading-text">Loading tasks...</p>
           ) : !selectedUser ? (
-            <div className="empty-box">
+            <div className="empty-box tasks-empty-state">
               <p>Please select a user from the list.</p>
             </div>
           ) : tasks.length === 0 ? (
-            <div className="empty-box">
+            <div className="empty-box tasks-empty-state">
               <p>No tasks assigned to this user. 🎉</p>
             </div>
           ) : (
-            <ul className="task-list">
+            <ul className="task-list tasks-list-flex">
               {tasks.map((task) => (
                 <li
                   key={task.id}
-                  className={`task-card ${
-                    task.status === "completed"
-                      ? "usertasks-border-completed"
-                      : "usertasks-border-pending"
-                  }`}
+                  className={`task-card glass-panel task-card-item ${task.status === "completed" ? "task-card-item-completed" : "task-card-item-pending"}`}
                 >
-                  <div className="task-datetime">
+                  <div className="task-datetime usertask-datetime">
                     📅 {new Date(task.date).toLocaleDateString("en-IN")} ⏰{" "}
                     {new Date(`1970-01-01T${task.time}`).toLocaleTimeString(
                       "en-IN",
                       { hour: "2-digit", minute: "2-digit", hour12: true }
                     )}
                   </div>
-                  <div className="task-desc">{task.description}</div>
-                  <div
-                    className={`usertasks-status ${
-                      task.status === "completed"
-                        ? "usertasks-status-completed"
-                        : "usertasks-status-pending"
-                    }`}
-                  >
-                    Status: {task.status}
-                  </div>
-                  <div
-                    className={`task-priority ${getPriorityClass(task.priority)} usertasks-priority`}
-                  >
-                    Priority: {task.priority || "Medium"}
+                  <div className="task-desc usertask-title">{task.description}</div>
+
+                  <div className="usertask-badges">
+                    <div className={`usertasks-status status-badge ${task.status === "completed" ? "status-badge-completed" : "status-badge-pending"}`}>
+                      Status: {task.status}
+                    </div>
+
+                    <div className={`task-priority priority-badge-static ${getPriorityClass(task.priority)}`}>
+                      Priority: {task.priority || "Medium"}
+                    </div>
                   </div>
                 </li>
               ))}
             </ul>
           )}
         </div>
-
       </div>
     </div>
   );

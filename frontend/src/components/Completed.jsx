@@ -33,8 +33,8 @@ function Completed() {
     try {
       const res = await fetch(
         `http://localhost:5000/tasks`, {
-          headers: { "Authorization": `Bearer ${token}` }
-        }
+        headers: { "Authorization": `Bearer ${token}` }
+      }
       );
       const data = await res.json();
 
@@ -73,7 +73,7 @@ function Completed() {
     const minutes = Math.floor((absMs % (1000 * 60 * 60)) / (1000 * 60));
 
     const formatted = `${hours}h ${minutes}m`;
-    
+
   };
 
   // 🔍 Filter Tasks based on Search + Priority
@@ -98,96 +98,101 @@ function Completed() {
   };
 
   return (
-    <div className="dashboards">
-      <Sidebar />
+    <div className="dashboard-layout">
+      <Sidebar className="dashboard-sidebar" />
 
-      <div className="pending-container">
-        <h1 className="pending-title">✅ {role === "admin" ? "All Completed Tasks" : "My Completed Tasks"}</h1>
-        
-        <div className="controls">
-          <input
-            type="text"
-            placeholder="🔍 Search completed tasks..."
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            className="search-bar"
-          />
+      <div className="dashboard-main">
+        <div className="pending-container glass-panel pending-wrapper">
+          <h1 className="pending-title">✅ {role === "admin" ? "All Completed Tasks" : "My Completed Tasks"}</h1>
 
-          <select
-            value={priorityFilter}
-            onChange={(e) => setPriorityFilter(e.target.value)}
-            className="priority-filter"
-            aria-label="Filter by priority"
-          >
-            <option value="all">All Priorities</option>
-            <option value="high">High Priority</option>
-            <option value="medium">Medium Priority</option>
-            <option value="low">Low Priority</option>
-          </select>
+          <div className="controls controls-wrapper">
+            <input
+              type="text"
+              placeholder="🔍 Search completed tasks..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="styled-input flex-1"
+            />
+
+            <select
+              value={priorityFilter}
+              onChange={(e) => setPriorityFilter(e.target.value)}
+              className="styled-input filter-dropdown"
+              aria-label="Filter by priority"
+            >
+              <option value="all">All Priorities</option>
+              <option value="high">High Priority</option>
+              <option value="medium">Medium Priority</option>
+              <option value="low">Low Priority</option>
+            </select>
+          </div>
+
+          {loading ? (
+            <p className="loading-text">Loading...</p>
+          ) : tasks.length === 0 ? (
+            <div className="empty-box glass-panel empty-box-card">
+              <p className="empty-title">No completed tasks yet 🎉</p>
+            </div>
+          ) : (
+            <ul className="task-list task-list-flex">
+              {filteredTasks.map(task => (
+                <li key={task.id} className="task-card glass-panel task-card-item task-border-completed" onClick={() => openTaskPopup(task)}>
+                  <div className="task-datetime task-meta">
+                    📅 {new Date(task.date).toLocaleDateString("en-IN")}
+                    <span className="time-remaining time-left">{getTimeRemaining(task.date, task.time)}</span>
+                  </div>
+
+                  <div className="task-desc task-description">
+                    {role === "admin" && <strong className="assigned-badge">[Assigned to: {task.assigned_user}] </strong>}
+                    {task.description}
+                  </div>
+
+                  <div className={`task-priority ${getPriorityClass(task.priority)} task-status-bar`}>
+                    Priority: {task.priority || 'Medium'}
+                  </div>
+
+                  <div className="task-actions action-buttons">
+                    {role === "admin" && (
+                      <button className="btn-danger btn-auto-width" onClick={(e) => { e.stopPropagation(); deleteTask(task.id); }}>
+                        ❌ Delete
+                      </button>
+                    )}
+                  </div>
+                </li>
+              ))}
+            </ul>
+          )}
         </div>
 
-        {loading ? (
-          <p className="loading-text">Loading...</p>
-        ) : tasks.length === 0 ? (
-          <div className="empty-box">
-            <p>No completed tasks yet 🎉</p>
+        {showPopup && selectedTask && (
+          <div className="popup-modal-overlay popup-overlay" onClick={closePopup}>
+            <div className="popup-card glass-panel popup-modal-card" onClick={(e) => e.stopPropagation()}>
+              <h2 className="popup-title">📌 Task Details</h2>
+              <p><strong>Description:</strong> {selectedTask.description}</p>
+              <p><strong>Date:</strong> {selectedTask.date}</p>
+              <p><strong>Time:</strong> {selectedTask.time}</p>
+              <p><strong>Status:</strong> {selectedTask.status}</p>
+              <p><strong>Priority:</strong> <span className={`task-priority ${getPriorityClass(selectedTask.priority)} capitalize`}>{selectedTask.priority || 'Medium'}</span></p>
+
+              <div className="task-actions popup-actions">
+                <button className="btn-primary btn-gray" onClick={closePopup}>Close</button>
+                {role === "admin" && (
+                  <button
+                    className="btn-danger btn-danger-flex"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      deleteTask(selectedTask.id);
+                      closePopup();
+                    }}
+                  >
+                    ❌ Delete
+                  </button>
+                )}
+              </div>
+            </div>
           </div>
-        ) : (
-          <ul className="task-list">
-            {filteredTasks.map(task => (
-              <li key={task.id} className="task-card" onClick={() => openTaskPopup(task)}>
-                <div className="task-datetime">
-                  📅 {new Date(task.date).toLocaleDateString("en-IN")}
-                  <span className="time-remaining">{getTimeRemaining(task.date, task.time)}</span>
-                </div>
-
-                <div className="task-desc">
-                  {role === "admin" && <strong>[Assigned to: {task.assigned_user}] </strong>}
-                  {task.description}
-                </div>
-
-                <div className={`task-priority ${getPriorityClass(task.priority)}`} style={{marginTop: '10px'}}>
-                  Priority: {task.priority || 'Medium'}
-                </div>
-
-                <div className="task-actions">
-                  {role === "admin" && (
-                    <button className="btn-delete" onClick={(e) => { e.stopPropagation(); deleteTask(task.id); }}>
-                      ❌ Delete
-                    </button>
-                  )}
-                </div>
-              </li>
-            ))}
-          </ul>
         )}
       </div>
-
-      {showPopup && selectedTask && (
-        <div className="popup-overlay" onClick={closePopup}>
-          <div className="popup-card" onClick={(e) => e.stopPropagation()}>
-            <h2>📌 Task Details</h2>
-            <p><strong>Description:</strong> {selectedTask.description}</p>
-            <p><strong>Date:</strong> {selectedTask.date}</p>
-            <p><strong>Time:</strong> {selectedTask.time}</p>
-            <p><strong>Status:</strong> {selectedTask.status}</p>
-            <p><strong>Priority:</strong> <span className={`task-priority ${getPriorityClass(selectedTask.priority)}`}>{selectedTask.priority || 'Medium'}</span></p>
-            <button className="btn-close" onClick={closePopup}>Close</button>
-            {role === "admin" && (
-    <button
-      className="btn-delete"
-      onClick={(e) => {
-        e.stopPropagation();
-        deleteTask(selectedTask.id);
-        closePopup();
-      }} 
-    >
-      ❌ Delete
-    </button>
-  )}
-          </div>
-        </div>
-      )}
     </div>
   );
 }

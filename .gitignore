@@ -1,0 +1,2 @@
+git rm -cached .env.example
+git rm -cached .env

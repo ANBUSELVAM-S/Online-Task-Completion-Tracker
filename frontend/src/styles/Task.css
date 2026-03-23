@@ -1,15 +1,21 @@
-.task-container{
+.task-container {
   padding: 20px;
-  width: 76rem;
-  height: 90%;
+  width: 68rem;
+  height: 100%;
   overflow-y: auto;
   background-color: rgb(255, 252, 252);
-  
+
 }
+
 .task-container::-webkit-scrollbar {
-  display: none; /* Chrome, Safari, Opera */
+  display: none;
+  /* Chrome, Safari, Opera */
 }
-.option{
+.styled-input{
+  width: 90%;
+}
+
+.option {
   width: 103%;
   padding: 10px;
   margin-top: 5px;
@@ -18,18 +24,18 @@
   outline: none;
   transition: 0.3s;
 }
-  
+
 
 /* Form card */
 form {
   background: rgb(255, 255, 255);
   padding: 30px 25px;
   margin: 2rem;
-  gap:10px;
+  gap: 10px;
   border-radius: 12px;
   width: 700px;
   margin-left: 10rem;
-  box-shadow: 0 15px 30px rgba(0,0,0,0.2);
+  box-shadow: 0 15px 30px rgba(0, 0, 0, 0.2);
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -38,7 +44,7 @@ form {
 /* Heading inside form */
 form h2 {
   margin-bottom: 20px;
-  
+
   color: #4f46e5;
 }
 
@@ -51,13 +57,15 @@ form label {
   text-align: left;
   color: #333;
 }
-.task-heading{
+
+.task-heading {
   font-size: 24px;
   font-weight: 700;
   margin-bottom: 30px;
   padding-left: 10rem;
   color: #000000;
 }
+
 /* Inputs and textarea */
 form input,
 form textarea {
@@ -94,8 +102,9 @@ form button:hover {
   opacity: 0.9;
   transform: translateY(-2px);
 }
- textarea{
-  height:10rem;
+
+textarea {
+  height: 10rem;
 }
 
 /* Task list */
@@ -220,9 +229,10 @@ ul li::before {
   .dashboard,
   .dashboards {
     flex-direction: column;
-    height: auto;  
+    height: auto;
     min-height: 100vh;
-    overflow-x: hidden; /* ✅ stop page-level horizontal scroll */
+    overflow-x: hidden;
+    /* ✅ stop page-level horizontal scroll */
   }
 
   /* --- Top navbar bar (full width) --- */
@@ -340,7 +350,8 @@ ul li::before {
     margin: 0 auto 8px;
     flex-direction: row;
     box-sizing: border-box;
-    word-break: break-word;    /* ✅ long text wraps */
+    word-break: break-word;
+    /* ✅ long text wraps */
     overflow-wrap: break-word;
   }
 }
@@ -410,4 +421,22 @@ ul li::before {
   textarea {
     height: 6rem;
   }
+}
+
+/* Dashboard Wrapper Custom Styles */
+.task-wrapper {
+  padding: 2rem;
+}
+
+.detailed-textarea {
+  min-height: 100px;
+  resize: vertical;
+}
+
+.mt-btn {
+  margin-top: 1rem;
+}
+
+.mt-header {
+  margin-top: 3rem;
 }

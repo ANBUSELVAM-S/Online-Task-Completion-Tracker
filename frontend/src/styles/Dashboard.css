@@ -1,472 +1,423 @@
-.dashboard {
-  display: flex;
-   font-family: 'Poppins', sans-serif;
-  height: 98vh;
-  background: #f6f6f6;
-}
-/* 
-/* Sidebar */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
 
-
-/* Main Content */
-.main-content {
-  flex: 1;
-  width: 77.2rem;
-  height: 90%;
- 
-  background-color: white;
-  
-}
-.main-content::-webkit-scrollbar {
-  display: none; /* Chrome, Safari, Opera */
-}
-/* Navbar */
-.navbar {
-  display: flex;
-  justify-content: space-between;
-  
-}
-/* Profile Container (top-right corner) */
-.profile-container {
-  position: absolute;
-  top: 1rem;
-  right: 4rem;
-  z-index: 1000;
+body {
+    background-color: #f3f4f6;
+    margin: 0;
+    padding: 0;
 }
 
-/* Clickable Icon */
-.profile-icon {
-  cursor: pointer;
-  font-size: 2rem;
-  user-select: none;
+/* Base Layout */
+.dashboard-layout {
+    display: flex;
+    font-family: 'Inter', sans-serif;
+    height: 100vh;
+    background: linear-gradient(135deg, #fdfbfb 0%, #ebedee 100%);
+    overflow: hidden;
+    color: #1f2937;
 }
 
-/* Material UI Icon Styling */
-.account-icon {
-  color: #030303;
-  width: 3rem !important;
-  height: 4rem !important;
-  transition: 0.2s;
+/* Sidebar Placeholder Area */
+.dashboard-sidebar {
+    width: 250px;
+    flex-shrink: 0;
 }
 
-.account-icon:hover {
-  transform: scale(1.05);
+/* Main Content Area */
+.dashboard-main {
+    flex: 1;
+    overflow-y: auto;
+    padding: 2rem 3rem;
+    position: relative;
 }
 
-/* Dropdown Panel */
-.profile-dropdown {
-  position: absolute;
-  right: 0;
-  top: 3rem;
-  background-color: white;
-  padding: 1rem;
-  border-radius: 8px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-  min-width: 220px;
-  border: 1px solid #eee;
+/* Hide scrollbar */
+.dashboard-main::-webkit-scrollbar {
+    width: 8px;
+}
+.dashboard-main::-webkit-scrollbar-thumb {
+    background-color: #cbd5e1;
+    border-radius: 4px;
 }
 
-/* Email Text */
-.profile-email {
-  margin: 0.5rem 0;
-  font-weight: 600;
-  color: #333;
-}
-
-/* Login Time Text */
-.profile-time {
-  margin: 0.5rem 0;
-  font-size: 0.85rem;
-  color: #666;
-}
-
-/* Logout Button */
-.logout-btn {
-  margin-top: 0.5rem;
-  width: 100%;
-  padding: 0.5rem;
-  background-color: #dc3545;
-  color: white;
-  border: none;
-  border-radius: 4px;
-  cursor: pointer;
-  font-weight: bold;
-  transition: 0.2s;
-}
-
-.logout-btn:hover {
-  background-color: #c82333;
-}
-
-
-/* ===== Add User Section ===== */
-
-.add-user-box {
-  margin-top: 40px;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 10px;
-  margin-left: 8rem;
-  background: #b8ebef;
-  padding: 25px;
-  border-radius: 10px;
-  box-shadow: 0 4px 10px rgba(0,0,0,0.08);
-  max-width: 400px;
-}
-
-.add-user-box h3 {
-  margin-bottom: 15px;
-}
-
-.add-user-box input {
-  width: 100%;
-  padding: 10px;
-  margin-bottom: 10px;
-  border-radius: 6px;
-  border: 1px solid #ddd;
-}
-
-.add-user-box button {
-  width: 100%;
-  padding: 10px;
-  border: none;
-  background: #2563eb;
-  color: white;
-  border-radius: 6px;
-  cursor: pointer;
-}
-
-.add-user-box button:hover {
-  background: #1e40af;
-}
-
-/* Cards */
-.cards {
-  display: flex;
-  gap: 5px;
-  
-}
-
-.card {
-  background: rgb(255, 255, 255);
-  padding: 25px;
-  width: 200px;
-  margin-left: 5rem;
-  border-radius: 8px;
-  
-  color: rgb(0, 0, 0);
-  box-shadow: 10px 10px 10px 10px rgba(0, 0, 0, 0.1);
-}
-
-.card h3 {
-  margin-bottom: 10px;
-}
-
-.card p {
-  font-size: 24px;
-  font-weight: bold;
-}
-
-/* Sidebar stays the same */
-.sidebar {
-  width: 220px;
-  height: 94.5vh;
-  background: #1e293b;
-  color: white;
-  padding: 20px;
-  cursor: pointer;
-  position: relative;
-}
-
-
-/* ================= RESPONSIVE ONLY ================= */
-
-
-.chart-box {
-  display: flex;
-  justify-content: space-around;
-  margin-top: 50px;
-}
-.piedata{
-  text-align: center;
-}
-
-/* ================================================
-   HAMBURGER BUTTON — hidden on desktop by default
-   ================================================ */
-
-.hamburger-btn {
-  display: none;
-  flex-direction: column;
-  justify-content: center;
-  gap: 5px;
-  cursor: pointer;
-  background: none;
-  border: none;
-  padding: 6px;
-  z-index: 1100;
-}
-
-.hamburger-btn span {
-  display: block;
-  width: 26px;
-  height: 3px;
-  background-color: white;
-  border-radius: 3px;
-  transition: all 0.3s ease;
-}
-
-.hamburger-btn.open span:nth-child(1) {
-  transform: translateY(8px) rotate(45deg);
-}
-
-.hamburger-btn.open span:nth-child(2) {
-  opacity: 0;
-  transform: scaleX(0);
-}
-
-.hamburger-btn.open span:nth-child(3) {
-  transform: translateY(-8px) rotate(-45deg);
-}
-
-/* Overlay backdrop */
-.sidebar-overlay {
-  display: none;
-  position: fixed;
-  inset: 0;
-  background: rgba(0, 0, 0, 0.5);
-  z-index: 900;
-  opacity: 0;
-  transition: opacity 0.3s ease;
-}
-
-.sidebar-overlay.visible {
-  display: block;
-  opacity: 1;
-}
-
-/* ================================================
-   RESPONSIVE BREAKPOINTS
-   ================================================ */
-
-/* ===== TABLET (601px – 1024px) ===== */
-@media (max-width: 1024px) {
-  h3 {
-    color: black;
-    margin-left: 4rem;
-  }
-
-  .sidebar {
-    width: 180px;
-    padding: 15px;
-  }
-
-  .cards {
-    gap: 12px;
-    padding: 1rem;
-  }
-
-  .card {
-    flex: 1 1 150px;
-    padding: 18px;
-  }
-
-  .card p {
-    font-size: 20px;
-  }
-
-  .add-user-box {
-    margin-left: auto;
-    max-width: 360px;
-  }
-
-  .profile-container {
-    right: 1rem;
-  }
-}
-
-/* ===== MOBILE (up to 600px) ===== */
-@media (max-width: 600px) {
-
-  /* --- Dashboard wrapper --- */
-  .dashboard {
-    flex-direction: column;
-    height: auto;
-    min-height: 100vh;
-    /* ✅ NO overflow-x: hidden here — it clips position:absolute dropdowns */
-  }
-
-  /* --- Navbar full width sticky --- */
-  .navbar {
+/* Header */
+.dashboard-header {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    width: 95%;
-    background: #ffffff;
-    padding: 0.75rem 1rem;
-    box-sizing: border-box;
-    position: sticky;
-    top: 0;
-    z-index: 800;
-  }
-
-  /* --- Show hamburger button --- */
-  .hamburger-btn {
-    display: flex;
-  }
-
-  /* --- Sidebar slides in from left as overlay --- */
-  .sidebar {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 260px;
-    height: 100vh;
-    min-height: 100vh;
-    background: #1e293b;
-    padding: 20px;
-    z-index: 1000;
-    transform: translateX(-100%);
-    transition: transform 0.3s ease;
-    overflow-y: auto;
-  }
-
-  .sidebar.open {
-    transform: translateX(0);
-  }
-
-  .sidebar-overlay {
-    display: block;
-  }
-
-  /* --- Main content full width --- */
-  .main-content {
-    width: 100%;
-    max-width: 100%;
-    padding-bottom: 2rem;
-    box-sizing: border-box;
-  }
-
-  /* ✅ FIX — Profile icon fully visible, not cut off */
-  .profile-container {
-    position: relative;
-    top: auto;
-    right: 2rem;
-    bottom: 4.9rem;
-    display: flex;
-    justify-content: flex-end;
-    padding: 0.5rem 1rem;
-    box-sizing: border-box;
-    width: 100%;
-  }
-
-  .profile-dropdown {
-    right: 2rem;
-    min-width: 180px;
-    max-width: calc(100vw - 2rem); /* ✅ never wider than screen */
-  }
-
-  /* ✅ FIX — Cards column, full width, no overflow */
-  .cards {
-    flex-direction: column;
-    align-items: stretch;        /* ✅ cards stretch full width */
-    padding: 1rem;
-    gap: 16px;
-    width: 100%;
-    box-sizing: border-box;
-    overflow-x: hidden;
-  }
-
-  /* ✅ FIX — Card: full width, all content stays inside */
-  .card {
-    width: 100%;
-    max-width: 100%;
-    flex: unset;
-    margin-left: 0;              /* ✅ remove 5rem base offset */
-    margin-right: 0;
-    padding: 18px 20px;
-    box-sizing: border-box;
-    overflow: hidden;            /* ✅ nothing leaks outside */
-    position: relative;
-    box-shadow: 2px 2px 8px rgba(0, 0, 0, 0.08);
-  }
-
-  /* ✅ FIX — h3 resets tablet's margin-left:4rem */
-  .card h3 {
-    margin-left: 0;
-    margin-bottom: 8px;
-    font-size: 0.95rem;
-    color: #555;
-  }
-
-  /* ✅ FIX — number (p) stays inside the card */
-  .card p {
-    font-size: 22px;
-    font-weight: bold;
-    margin: 0;
-    padding: 0;
-    color: #000;
-  }
-
-  /* --- Add user box --- */
-  .add-user-box {
-    margin: 20px auto;
-    width: 90%;
-    max-width: 100%;
-    padding: 18px;
-    box-sizing: border-box;
-  }
-
-  /* --- Charts --- */
-  .chart-box {
-    flex-direction: column;
-    align-items: center;
-    margin-top: 30px;
-    gap: 24px;
-    padding: 0 1rem;
-    box-sizing: border-box;
-  }
-
-  .piedata {
-    width: 100%;
-  }
-
-  /* --- Account icon size --- */
-  .account-icon {
-    width: 2.2rem !important;
-    height: 3rem !important;
-  }
+    margin-bottom: 2.5rem;
 }
 
-/* ===== SMALL MOBILE (up to 380px) ===== */
-@media (max-width: 380px) {
-  .card h3 {
-    font-size: 0.85rem;
-  }
-
-  .card p {
-    font-size: 18px;
-  }
-
-  .add-user-box h3 {
+.header-greeting h2 {
+    font-size: 2rem;
+    font-weight: 700;
+    margin: 0;
+    color: #111827;
+}
+.header-greeting h2 span {
+    background: -webkit-linear-gradient(45deg, #3b82f6, #8b5cf6);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+.header-greeting p {
     font-size: 1rem;
-    margin-left: 0;
-  }
+    color: #6b7280;
+    margin: 0.5rem 0 0;
+}
 
-  .add-user-box input,
-  .add-user-box button {
+/* Profile Section */
+.profile-container {
+    position: relative;
+}
+
+.glass-icon {
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.7);
+    backdrop-filter: blur(10px);
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+.glass-icon:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+}
+.account-icon {
+    color: #4b5563;
+    font-size: 28px !important;
+}
+
+.profile-dropdown {
+    position: absolute;
+    right: 0;
+    top: 60px;
+    width: 260px;
+    padding: 1.5rem;
+    z-index: 50;
+    animation: slideDown 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+@keyframes slideDown {
+    0% { opacity: 0; transform: translateY(-10px); }
+    100% { opacity: 1; transform: translateY(0); }
+}
+
+.profile-info-hdr {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+.profile-email {
+    font-weight: 600;
+    margin: 0;
+    font-size: 0.95rem;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 150px;
+}
+.profile-badge {
+    font-size: 0.7rem;
+    background: rgba(59, 130, 246, 0.1);
+    color: #3b82f6;
+    padding: 2px 8px;
+    border-radius: 12px;
+    font-weight: 700;
+}
+
+.profile-divider {
+    height: 1px;
+    background: rgba(0,0,0,0.05);
+    margin: 1rem 0;
+}
+.profile-time {
+    font-size: 0.8rem;
+    color: #6b7280;
+    margin-bottom: 1rem;
+}
+
+.btn-danger {
+    background: linear-gradient(to right, #ef4444, #f87171);
+    color: white;
+    border: none;
+    padding: 0.6rem 1rem;
+    border-radius: 8px;
+    width: 100%;
+    font-weight: 600;
+    cursor: pointer;
+    transition: opacity 0.2s;
+}
+.btn-danger:hover {
+    opacity: 0.9;
+}
+
+/* Glass Panels */
+.glass-panel {
+    background: rgba(255, 255, 255, 0.85);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    border-radius: 16px;
+    box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05), 0 8px 10px -6px rgba(0, 0, 0, 0.01);
+}
+
+/* Grid Layout */
+.dashboard-content {
+    display: grid;
+    grid-template-columns: 2fr 1fr;
+    gap: 2rem;
+}
+
+.dashboard-col-left {
+    display: flex;
+    flex-direction: column;
+    gap: 2rem;
+}
+
+.dashboard-col-right {
+    display: flex;
+    flex-direction: column;
+    gap: 2rem;
+}
+
+/* KPI Cards */
+.kpi-cards {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1.5rem;
+}
+
+.kpi-card {
+    padding: 1.5rem;
+    display: flex;
+    align-items: center;
+    gap: 1.5rem;
+    transition: transform 0.2s;
+}
+.kpi-card:hover {
+    transform: translateY(-5px);
+}
+
+.kpi-icon {
+    width: 50px;
+    height: 50px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.5rem;
+}
+.total-icon { background: rgba(59, 130, 246, 0.1); }
+.completed-icon { background: rgba(16, 185, 129, 0.1); }
+.pending-icon { background: rgba(245, 158, 11, 0.1); }
+
+.kpi-details h3 {
+    margin: 0;
+    font-size: 0.9rem;
+    color: #6b7280;
+    font-weight: 500;
+}
+.kpi-number {
+    margin: 0;
+    font-size: 1.8rem;
+    font-weight: 700;
+    color: #111827;
+}
+
+/* Charts Grid */
+.charts-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1.5rem;
+}
+.chart-card {
+    padding: 1.5rem;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+.chart-title {
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: #374151;
+    margin: 0 0 1rem 0;
+    align-self: flex-start;
+}
+.chart-wrapper {
+    width: 100%;
+    display: flex;
+    justify-content: center;
+}
+.pie-chart-wrapper {
+    max-width: 250px;
+}
+.bar-chart-wrapper {
+    max-width: 100%;
+}
+
+/* Upcoming Widget */
+.upcoming-widget {
+    padding: 1.5rem;
+}
+.widget-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1.5rem;
+}
+.widget-header h3 {
+    margin: 0;
+    font-size: 1.1rem;
+    color: #1f2937;
+    font-weight: 600;
+}
+.badge-count {
+    background: #ef4444;
+    color: white;
+    font-size: 0.75rem;
+    font-weight: 700;
+    padding: 2px 8px;
+    border-radius: 12px;
+}
+.upcoming-list {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+.upcoming-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 1rem;
+    background: #ffffff;
+    padding: 1rem;
+    border-radius: 12px;
+    border: 1px solid #f3f4f6;
+    transition: box-shadow 0.2s;
+}
+.upcoming-item:hover {
+    box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05);
+}
+.priority-indicator {
+    width: 4px;
+    height: 40px;
+    border-radius: 4px;
+}
+.pr-high { background: #ef4444; }
+.pr-medium { background: #f59e0b; }
+.pr-low { background: #10b981; }
+
+.upcoming-details h4 {
+    margin: 0 0 0.4rem 0;
+    font-size: 0.95rem;
+    font-weight: 600;
+    color: #1f2937;
+}
+.upcoming-meta {
+    display: flex;
+    gap: 1rem;
+    font-size: 0.8rem;
+    color: #6b7280;
+}
+.upcoming-meta span {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+
+/* Admin Quick Add User */
+.admin-actions-widget {
+    padding: 1.5rem;
+    background: linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%) !important;
+}
+.admin-actions-widget h3 {
+    margin: 0;
+    font-size: 1.1rem;
+    color: #1e3a8a;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+.admin-actions-widget p {
     font-size: 0.85rem;
-    padding: 8px;
-  }
+    color: #3b82f6;
+    margin: 0.5rem 0 1rem;
+}
+.quick-add-form {
+    display: flex;
+    flex-direction: column;
+    gap: 0.8rem;
+}
 
-  .profile-dropdown {
-    min-width: 160px;
+.styled-input {
     padding: 0.75rem;
-  }
+    border: 1px solid #bfdbfe;
+    border-radius: 8px;
+    font-size: 0.9rem;
+    outline: none;
+    transition: all 0.2s;
+    background: white;
+}
+.styled-input:focus {
+    border-color: #3b82f6;
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2);
+}
 
-  .sidebar {
-    width: 220px;
-  }
+.btn-primary {
+    background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+    color: white;
+    border: none;
+    padding: 0.8rem;
+    border-radius: 8px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: transform 0.1s, box-shadow 0.2s;
+}
+.btn-primary:hover {
+    box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3);
+    transform: translateY(-1px);
+}
+
+/* RESPONSIVE DESIGN */
+@media (max-width: 1200px) {
+    .dashboard-content {
+        grid-template-columns: 1fr;
+    }
+    .kpi-cards {
+        grid-template-columns: repeat(3, 1fr);
+    }
+}
+
+@media (max-width: 900px) {
+    .dashboard-main {
+        padding: 1.5rem;
+        
+    }
+    .kpi-cards {
+        grid-template-columns: 1fr;
+    }
+    .charts-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+@media (max-width: 768px) {
+    .dashboard-layout {
+        flex-direction: column;
+        overflow-y: auto;
+        
+    }
+    .dashboard-sidebar {
+        width: 100%;
+        height: auto;
+        
+    }
+    .header-greeting h2 {
+        font-size: 1.5rem;
+    }
 }
