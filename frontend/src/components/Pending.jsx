@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import Sidebar from "./Sidebar";
 import "../styles/Pending.css";
+import { apiFetch } from "../utils/api";
 
 
 function Pending() {
@@ -12,7 +13,6 @@ function Pending() {
   const [priorityFilter, setPriorityFilter] = useState("all");
 
   const role = localStorage.getItem("role");
-  const token = localStorage.getItem("token");
 
   // ⏱ current date & time
   // ⏱ Indian current date & time
@@ -40,27 +40,14 @@ function Pending() {
 
 
   useEffect(() => {
-    if (token) {
-      fetchTasks();
-    }
-  }, [token]);
+    fetchTasks();
+  }, []);
 
   // ✅ FETCH ONLY PENDING TASKS
   const fetchTasks = async () => {
     try {
-      const res = await fetch(
-        `http://localhost:5000/tasks`, {
-        headers: { "Authorization": `Bearer ${token}` }
-      }
-      );
-      const data = await res.json();
-
-      // filter pending only
-      const pendingTasks = data.filter(
-        task => task.status === "pending"
-      );
-
-      setTasks(pendingTasks);
+      const data = await apiFetch("/tasks");
+      setTasks(data.filter(task => task.status === "pending"));
     } catch (err) {
       console.error("Fetch error:", err);
     } finally {
@@ -70,24 +57,25 @@ function Pending() {
 
   // ✅ COMPLETE TASK
   const completeTask = async (id) => {
-    await fetch(`http://localhost:5000/tasks/${id}/complete`, {
-      method: "PUT",
-      headers: { "Authorization": `Bearer ${token}` }
-    });
-
-    setTasks(tasks.filter(task => task.id !== id));
+    try {
+      await apiFetch(`/tasks/${id}/complete`, { method: "PUT" });
+      setTasks(prev => prev.filter(task => task.id !== id));
+    } catch (err) {
+      console.error("Complete task error:", err);
+      alert("Failed to complete task.");
+    }
   };
 
   // ✅ DELETE TASK
   const deleteTask = async (id) => {
     if (!window.confirm("Delete this task?")) return;
-
-    await fetch(`http://localhost:5000/tasks/${id}`, {
-      method: "DELETE",
-      headers: { "Authorization": `Bearer ${token}` }
-    });
-
-    setTasks(tasks.filter(task => task.id !== id));
+    try {
+      await apiFetch(`/tasks/${id}`, { method: "DELETE" });
+      setTasks(prev => prev.filter(task => task.id !== id));
+    } catch (err) {
+      console.error("Delete error:", err);
+      alert("Failed to delete task.");
+    }
   };
 
   // 🔍 Filter Tasks based on Search + Priority

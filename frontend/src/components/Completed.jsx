@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import Sidebar from "./Sidebar";
 import "../styles/Pending.css";
+import { apiFetch } from "../utils/api";
 
 function Completed() {
   const [tasks, setTasks] = useState([]);
@@ -11,7 +12,6 @@ function Completed() {
   const [priorityFilter, setPriorityFilter] = useState("all");
 
   const role = localStorage.getItem("role");
-  const token = localStorage.getItem("token");
 
   const openTaskPopup = (task) => {
     setSelectedTask(task);
@@ -24,25 +24,13 @@ function Completed() {
   };
 
   useEffect(() => {
-    if (token) {
-      fetchTasks();
-    }
-  }, [token]);
+    fetchTasks();
+  }, []);
 
   const fetchTasks = async () => {
     try {
-      const res = await fetch(
-        `http://localhost:5000/tasks`, {
-        headers: { "Authorization": `Bearer ${token}` }
-      }
-      );
-      const data = await res.json();
-
-      // Filter completed only
-      const completedTasks = data.filter(
-        task => task.status === "completed"
-      );
-
+      const data = await apiFetch("/tasks");
+      const completedTasks = data.filter(task => task.status === "completed");
       setTasks(completedTasks);
     } catch (err) {
       console.error("Fetch error:", err);
@@ -53,13 +41,13 @@ function Completed() {
 
   const deleteTask = async (id) => {
     if (!window.confirm("Delete this task?")) return;
-
-    await fetch(`http://localhost:5000/tasks/${id}`, {
-      method: "DELETE",
-      headers: { "Authorization": `Bearer ${token}` }
-    });
-
-    setTasks(tasks.filter(task => task.id !== id));
+    try {
+      await apiFetch(`/tasks/${id}`, { method: "DELETE" });
+      setTasks(prev => prev.filter(task => task.id !== id));
+    } catch (err) {
+      console.error("Delete error:", err);
+      alert("Failed to delete task.");
+    }
   };
 
   // ⏱ Time remaining until deadline

@@ -3,30 +3,60 @@ import LoginPage from "./pages/Loginpage";
 import DashboardPage from "./pages/DashboardPage";
 import TaskPage from "./pages/TaskPage";
 import PendingPage from "./pages/PendingPage";
-import AdminRoute from "./components/AdminRoute";
 import Completed from "./components/Completed";
 import UserTasks from "./components/UserTasks";
+import PrivateRoute from "./components/PrivateRoute";
 
 function App() {
   return (
     <BrowserRouter>
       <Routes>
+        {/* Public */}
         <Route path="/" element={<LoginPage />} />
-        <Route path="/dashboard" element={<DashboardPage />} />
 
-        {/* 🔒 Admin-only */}
+        {/* Protected – any authenticated user */}
+        <Route
+          path="/dashboard"
+          element={
+            <PrivateRoute>
+              <DashboardPage />
+            </PrivateRoute>
+          }
+        />
+        <Route
+          path="/Pending"
+          element={
+            <PrivateRoute>
+              <PendingPage />
+            </PrivateRoute>
+          }
+        />
+        <Route
+          path="/Completed"
+          element={
+            <PrivateRoute>
+              <Completed />
+            </PrivateRoute>
+          }
+        />
+
+        {/* Protected – Admin only */}
         <Route
           path="/Task"
           element={
-            <AdminRoute>
+            <PrivateRoute requiredRole="admin">
               <TaskPage />
-            </AdminRoute>
+            </PrivateRoute>
           }
         />
-        <Route path="/userTasks" element={<AdminRoute><UserTasks /></AdminRoute>} />
-
-        <Route path="/Pending" element={<PendingPage />} />
-        <Route path="/Completed" element={<Completed />} />
+        <Route
+          path="/userTasks"
+          element={
+            <PrivateRoute requiredRole="admin">
+              <UserTasks />
+            </PrivateRoute>
+          }
+        />
       </Routes>
     </BrowserRouter>
   );

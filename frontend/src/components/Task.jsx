@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback } from "react";
 import Sidebar from "./Sidebar";
 import "../styles/Task.css";
+import { apiFetch } from "../utils/api";
 
 
 function Task() {
@@ -15,19 +16,15 @@ function Task() {
 
 
   const role = localStorage.getItem("role");
-  const token = localStorage.getItem("token");
 
   const fetchUsers = useCallback(async () => {
     try {
-      const res = await fetch("http://localhost:5000/users", {
-        headers: { "Authorization": `Bearer ${token}` }
-      });
-      const data = await res.json();
+      const data = await apiFetch("/users");
       setUsers(data);
     } catch (err) {
       console.error("Failed to fetch users", err);
     }
-  }, [token]);
+  }, []);
 
   useEffect(() => {
     if (role === "admin") {
@@ -36,82 +33,45 @@ function Task() {
   }, [role, fetchUsers]);
   const handleAddUser = async (e) => {
     e.preventDefault();
-
     try {
-      const response = await fetch("http://localhost:5000/users", {  // ✅ FIXED URL
+      const data = await apiFetch("/users", {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "Authorization": `Bearer ${token}`
-        },
-        body: JSON.stringify(newUser)
+        body: JSON.stringify(newUser),
       });
-
-      const contentType = response.headers.get("content-type");
-
-      if (contentType && contentType.includes("application/json")) {
-        const data = await response.json();
-
-        if (response.ok) {
-          alert("✅ User added successfully");
-          setNewUser({ email: "", password: "" });
-          fetchUsers();
-        } else {
-          alert(data.message || "❌ Failed to add user");
-        }
+      if (data.success) {
+        alert("✅ User added successfully");
+        setNewUser({ email: "", password: "" });
+        fetchUsers();
       } else {
-        const text = await response.text();
-        console.error("Server response:", text);
-        alert(`Server Error: ${response.status}`);
+        alert(data.message || "❌ Failed to add user");
       }
-
     } catch (error) {
       console.error(error);
-      alert("❌ Network error or Server not reachable");
+      alert("❌ " + (error.message || "Network error"));
     }
   };
 
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-
     if (!date || !time || !description || !assignedTo) {
       alert("Please fill all fields.");
       return;
     }
-
     setLoading(true);
-
     try {
-      const response = await fetch("http://localhost:5000/tasks", {
+      const result = await apiFetch("/tasks", {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "Authorization": `Bearer ${token}`
-        },
-        body: JSON.stringify({
-          assigned_to: assignedTo,
-          date,
-          time,
-          description,
-          priority,
-        })
+        body: JSON.stringify({ assigned_to: assignedTo, date, time, description, priority }),
       });
-
-      const result = await response.json();
-
       if (result.success) {
         alert("✅ Task added successfully!");
-        setDate("");
-        setTime("");
-        setDescription("");
-        setAssignedTo("");
-        setPriority("medium");
+        setDate(""); setTime(""); setDescription(""); setAssignedTo(""); setPriority("medium");
       } else {
         alert("❌ " + result.message);
       }
     } catch (error) {
-      alert("❌ Server not responding");
+      alert("❌ " + (error.message || "Server not responding"));
       console.error(error);
     } finally {
       setLoading(false);

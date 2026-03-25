@@ -1,43 +1,51 @@
+require("dotenv").config();
 const express = require("express");
 const mysql = require("mysql2");
-const cors = require("cors");
-const bcrypt = require("bcryptjs");
-const jwt = require("jsonwebtoken");
-require("dotenv").config();
-
-// Import Middleware
-const applySecurity = require("./middleware/security.js");
-const { authenticateToken, requireAdmin } = require("./middleware/auth.js");
-const {
-  validateRequest,
-  loginRules,
-  addUserRules,
-  addTaskRules,
-  googleLoginRules,
-} = require("./middleware/validation");
-
-const app = express();
-applySecurity(app);
-app.use(cors());
-app.use(express.json());
-
-const SECRET_KEY = process.env.JWT_SECRET;
-if (!SECRET_KEY) {
-  console.error("❌ FATAL ERROR: JWT_SECRET is not defined in .env");
-  process.exit(1);
-}
-
+const cookieParser = require("cookie-parser");
 const nodemailer = require("nodemailer");
-const cron = require("node-cron"); // ✅ added
+const cron = require("node-cron");
 
-const transporter = nodemailer.createTransport({
-  service: "gmail",
-  auth: {
-    user: process.env.EMAIL_USER,
-    pass: process.env.EMAIL_PASS
+// ─── Middleware ────────────────────────────────────────────────────────────────
+const { applySecurity } = require("./middleware/security");
+
+// ─── Routes ───────────────────────────────────────────────────────────────────
+const authRoutes = require("./routes/authRoutes");
+const taskRoutes = require("./routes/taskRoutes");
+const userRoutes = require("./routes/userRoutes");
+const dashboardRoutes = require("./routes/dashboardRoutes");
+
+// ─── Validate Required Env Vars ────────────────────────────────────────────────
+const REQUIRED_ENV = [
+  "JWT_SECRET",
+  "REFRESH_TOKEN_SECRET",
+  "DB_HOST",
+  "DB_USER",
+  "DB_PASSWORD",
+  "DB_NAME",
+  "EMAIL_USER",
+  "EMAIL_PASS",
+  "ADMIN_EMAIL",
+];
+
+REQUIRED_ENV.forEach((key) => {
+  if (!process.env[key]) {
+    console.error(`❌ FATAL: Missing environment variable: ${key}`);
+    process.exit(1);
   }
 });
-// ✅ SCALABILITY: Use Connection Pool
+
+// ─── App Setup ─────────────────────────────────────────────────────────────────
+const app = express();
+
+// Security middleware (Helmet, CORS, Rate Limiting, Morgan)
+applySecurity(app);
+
+// Body parsers & cookie support
+app.use(express.json({ limit: "10kb" }));         // Limit body size to prevent DoS
+app.use(express.urlencoded({ extended: false }));
+app.use(cookieParser());
+
+// ─── Database (Connection Pool) ────────────────────────────────────────────────
 const db = mysql.createPool({
   host: process.env.DB_HOST,
   user: process.env.DB_USER,
@@ -45,392 +53,111 @@ const db = mysql.createPool({
   database: process.env.DB_NAME,
   waitForConnections: true,
   connectionLimit: 10,
-  queueLimit: 0
+  queueLimit: 0,
 });
 
-/* ================= LOGIN ================= */
-app.post(
-  "/login",
-  loginRules,
-  validateRequest,
-  (req, res) => {
-  const { email, password } = req.body;
-  console.log("loginRules:", loginRules);
-  console.log("validateRequest:", validateRequest);
-
-  db.query(
-    "SELECT * FROM users WHERE email = ?",
-    [email],
-    async (err, result) => {
-      if (err) return res.status(500).json({ success: false });
-
-      if (result.length === 0) {
-        return res.json({ success: false, message: "Invalid email" });
-      }
-
-      const user = result[0];
-
-      // ✅ FIX: Prevent crash if user is Google-only
-      if (user.password === "GOOGLE_USER") {
-        return res.json({ success: false, message: "Please login with Google" });
-      }
-
-      const match = await bcrypt.compare(password, user.password);
-
-      if (!match) {
-        return res.json({ success: false, message: "Wrong password" });
-      }
-
-      // ✅ SECURITY: Generate JWT
-      const token = jwt.sign({ id: user.id, role: user.role }, SECRET_KEY, { expiresIn: "1h" });
-
-      res.json({
-        success: true,
-        token,
-        user_id: user.id,
-        role: user.role
-      });
-    }
-  );
-});
-/* ================= GET USERS (For Admin Dropdown) ================= */
-app.get("/users", authenticateToken, requireAdmin, (req, res) => {
-  db.query("SELECT id, email FROM users WHERE role = 'user'", (err, results) => {
-    if (err) return res.status(500).json(err);
-    res.json(results);
-  });
-});
-
-/* ================= ADD USER (Admin Only) ================= */
-app.post(
-  "/users",
-  authenticateToken,
-  requireAdmin,
-  addUserRules,
-  validateRequest,
-  async (req, res) => {
-  const { email, password } = req.body;
-
-  db.query("SELECT * FROM users WHERE email = ?", [email], async (err, result) => {
-    if (err) return res.status(500).json({ success: false, message: "Database error" });
-    if (result.length > 0) {
-      return res.status(400).json({ success: false, message: "User already exists" });
-    }
-
-    const hashedPassword = await bcrypt.hash(password, 10);
-
-    db.query("INSERT INTO users (email, google_id, password, role) VALUES (?, ?, ?, 'user')", [email, null, hashedPassword], (err, result) => {
-      if (err) return res.status(500).json({ success: false, message: "Error creating user" });
-      res.json({ success: true, message: "User created successfully" });
-    });
-  });
-});
-
-// hello
-
-/* ================= ADD TASK (Admin Only) ================= */
-app.post(
-  "/tasks",
-  authenticateToken,
-  requireAdmin,
-  addTaskRules,
-  validateRequest,
-  (req, res) => {
-   
-  console.log("Incoming Task:", req.body);
-  // ✅ FIX: Include 'priority' when creating a task.
-  const { assigned_to, date, time, description, priority } = req.body;
-
-  // ✅ FIX: Add 'priority' to the SQL INSERT statement.
-  const sql = "INSERT INTO tasks (user_id, date, time, description, priority, status) VALUES (?,?,?,?, ?, 'pending')";
-
-  db.query(sql, [assigned_to, date, time, description, priority || 'medium'], (err, result) => {
-    if (err) return res.status(500).json({ success: false });
-
-    // 🔹 Get user email
-    db.query("SELECT email FROM users WHERE id=?", [assigned_to], (err, userResult) => {
-      if (!err && userResult.length > 0) {
-
-        const userEmail = userResult[0].email;
-
-        const mailOptions = {
-          from: "Task Manager <anbuselvam.sk05@gmail.com>",
-          to: userEmail,
-          subject: "New Task Assigned",
-          text: `You have a new task:\n\n${description}\nDate: ${date}\nTime: ${time}`
-        };
-
-        transporter.sendMail(mailOptions, (error, info) => {
-          if (error) {
-            console.log("Email error:", error);
-          } else {
-            console.log("Email sent:", info.response);
-          }
-        });
-      }
-    });
-
-    res.json({ success: true });
-  });
-});
-
-/* ================= GET TASKS ================= */
-app.get("/tasks", authenticateToken, (req, res) => {
-  let sql;
-  let params = [];
-
-  if (req.user.role === "admin") {
-    // Admin sees ALL tasks with assignee info
-    sql = "SELECT t.*, u.email as assigned_user FROM tasks t JOIN users u ON t.user_id = u.id ORDER BY CASE t.priority WHEN 'high' THEN 1 WHEN 'medium' THEN 2 WHEN 'low' THEN 3 ELSE 4 END, t.date, t.time";
-  } else {
-    // User sees ONLY their tasks
-    sql = "SELECT * FROM tasks WHERE user_id = ? ORDER BY CASE priority WHEN 'high' THEN 1 WHEN 'medium' THEN 2 WHEN 'low' THEN 3 ELSE 4 END, date, time";
-    params = [req.user.id];
+// Verify DB connection on startup
+db.getConnection((err, connection) => {
+  if (err) {
+    console.error("❌ Database connection failed:", err.message);
+    process.exit(1);
   }
-
-  db.query(sql, params, (err, results) => {
-    if (err) return res.status(500).json(err);
-    res.json(results);
-  });
+  console.log("✅ MySQL database connected successfully.");
+  connection.release();
 });
 
-/* ================= COMPLETE TASK ================= */
-app.put("/tasks/:id/complete", authenticateToken, (req, res) => {
-
-  const taskId = req.params.id;
-
-  const sql = req.user.role === 'admin'
-    ? "UPDATE tasks SET status='completed' WHERE id=?"
-    : "UPDATE tasks SET status='completed' WHERE id=? AND user_id=?";
-
-  const params = req.user.role === 'admin'
-    ? [taskId]
-    : [taskId, req.user.id];
-
-  db.query(sql, params, (err, result) => {
-
-    if (err) return res.status(500).json({ success: false });
-
-    if (result.affectedRows === 0) {
-      return res.status(403).json({
-        success: false,
-        message: "Unauthorized"
-      });
-    }
-
-    /* 🔹 GET TASK DETAILS */
-    db.query(
-      `SELECT t.description, t.date, t.time, u.email
-       FROM tasks t
-       JOIN users u ON t.user_id = u.id
-       WHERE t.id = ?`,
-      [taskId],
-      (err, taskResult) => {
-
-        if (!err && taskResult.length > 0) {
-
-          const task = taskResult[0];
-
-          const mailOptions = {
-            from: "Task Manager <" + process.env.EMAIL_USER + ">",
-            to: process.env.ADMIN_EMAIL,
-            subject: "Task Completed",
-            text: `
-User has completed a task.
-
-Task Description: ${task.description}
-Date: ${task.date}
-Time: ${task.time}
-
-Completed by: ${task.email}
-            `
-          };
-
-          transporter.sendMail(mailOptions, (error, info) => {
-            if (error) {
-              console.log("Email error:", error);
-            } else {
-              console.log("Completion email sent:", info.response);
-            }
-          });
-        }
-
-      });
-
-    res.json({ success: true });
-
-  });
-
-});
-// 📊 Dashboard counts API
-app.get("/dashboard/counts", authenticateToken, (req, res) => {
-  let sql;
-  let params = [];
-
-  if (req.user.role === "admin") {
-    sql = `SELECT COUNT(*) AS total, SUM(status = 'completed') AS completed, SUM(status = 'pending') AS pending FROM tasks`;
-  } else {
-    sql = `SELECT COUNT(*) AS total, SUM(status = 'completed') AS completed, SUM(status = 'pending') AS pending FROM tasks WHERE user_id = ?`;
-    params = [req.user.id];
-  }
-
-  db.query(sql, params, (err, results) => {
-    if (err) {
-      console.error("Dashboard count error:", err);
-      return res.status(500).json({ error: "DB error" });
-    }
-
-    res.json(results[0]);
-  });
+// ─── Nodemailer ────────────────────────────────────────────────────────────────
+const transporter = nodemailer.createTransport({
+  service: "gmail",
+  auth: {
+    user: process.env.EMAIL_USER,
+    pass: process.env.EMAIL_PASS,
+  },
 });
 
-/* ================= DELETE TASK ================= */
-app.delete("/tasks/:id", authenticateToken, requireAdmin, (req, res) => {
-  db.query("DELETE FROM tasks WHERE id=?", [req.params.id], err => {
-    if (err) return res.status(500).json({ success: false });
-    res.json({ success: true });
-  });
+// ─── Share db & transporter via app locals ─────────────────────────────────────
+app.set("db", db);
+app.set("transporter", transporter);
+
+// ─── Routes ───────────────────────────────────────────────────────────────────
+app.use("/", authRoutes);           // POST /login, /google-login, /refresh-token, /logout
+app.use("/tasks", taskRoutes);      // GET/POST/PUT/DELETE /tasks
+app.use("/users", userRoutes);      // GET/POST /users
+app.use("/dashboard", dashboardRoutes); // GET /dashboard/counts
+
+// ─── Health Check ──────────────────────────────────────────────────────────────
+app.get("/health", (_req, res) => {
+  res.json({ success: true, message: "Server is healthy.", timestamp: new Date().toISOString() });
 });
 
-app.post(
-  "/google-login",
-  googleLoginRules,
-  validateRequest,
-  (req, res) => {
-  const { email, google_id } = req.body;
-
-  db.query("SELECT * FROM users WHERE email = ?", [email], (err, result) => {
-    if (err) {
-      console.error("Google Login DB Error:", err);
-      return res.status(500).json({ success: false, message: "Database error checking user" });
-    }
-
-    // User already exists
-    if (result.length > 0) {
-      const user = result[0];
-      const token = jwt.sign({ id: user.id, role: user.role }, SECRET_KEY, { expiresIn: "1h" });
-      return res.json({ success: true, token, user_id: user.id, role: user.role });
-    }
-
-    // New Google user
-    db.query(
-      "INSERT INTO users (email, google_id, password) VALUES (?, ?, ?)",
-      [email, google_id, "GOOGLE_USER"],
-      (err, insertResult) => {
-        if (err) {
-          console.error("Google Login Insert Error:", err);
-          return res.status(500).json({ success: false, message: "Database error creating user" });
-        }
-
-        const newUser = { id: insertResult.insertId, role: "user" };
-        const token = jwt.sign({ id: newUser.id, role: newUser.role }, SECRET_KEY, { expiresIn: "1h" });
-        res.json({ success: true, token, user_id: newUser.id, role: newUser.role });
-      }
-    );
-  });
+// ─── 404 Handler ───────────────────────────────────────────────────────────────
+app.use((_req, res) => {
+  res.status(404).json({ success: false, message: "Route not found." });
 });
 
+// ─── Global Error Handler ──────────────────────────────────────────────────────
+// eslint-disable-next-line no-unused-vars
+app.use((err, req, res, _next) => {
+  console.error("🔥 Unhandled Server Error:", err);
 
-/* ================= TASK REMINDER SCHEDULER ================= */
+  // Don't leak error details in production
+  const message =
+    process.env.NODE_ENV === "production"
+      ? "An unexpected error occurred."
+      : err.message;
+
+  res.status(err.status || 500).json({ success: false, message });
+});
+
+// ─── Task Reminder Scheduler ───────────────────────────────────────────────────
 cron.schedule("* * * * *", () => {
-
-  console.log("⏳ Checking reminders...");
-
   const sql = `
     SELECT t.id, t.description, t.date, t.time, u.email
     FROM tasks t
     JOIN users u ON t.user_id = u.id
     WHERE t.status = 'pending'
-    AND (t.reminder_sent = FALSE OR t.reminder_sent IS NULL)
+      AND (t.reminder_sent = FALSE OR t.reminder_sent IS NULL)
   `;
 
   db.query(sql, (err, tasks) => {
-
     if (err) {
-      console.error("Reminder scheduler error:", err);
+      console.error("Reminder scheduler DB error:", err);
       return;
     }
 
-    console.log("Tasks found:", tasks.length);
+    const now = new Date(new Date().toLocaleString("en-US", { timeZone: "Asia/Kolkata" }));
 
-    // 🇮🇳 Current Indian Time
-    const now = new Date(
-      new Date().toLocaleString("en-US", { timeZone: "Asia/Kolkata" })
-    );
-
-    console.log("Current IST Time:", now);
-
-    tasks.forEach(task => {
-
-      // combine date + time
+    tasks.forEach((task) => {
       const taskDate = new Date(task.date).toLocaleDateString("en-CA", {
-  timeZone: "Asia/Kolkata"
-});
+        timeZone: "Asia/Kolkata",
+      });
       const deadline = new Date(`${taskDate}T${task.time}+05:30`);
-      
-      // reminder = 1 hour before deadline
-      const reminderTime = new Date(deadline.getTime() - (60 * 60 * 1000));
-      
-      // console.log("Task:", task.description);
-      // console.log("Deadline IST:", deadline);
-      // console.log("Reminder Time IST:", reminderTime);
+      const reminderTime = new Date(deadline.getTime() - 60 * 60 * 1000);
 
       if (now >= reminderTime && now < deadline) {
-
-        console.log("⚡ Sending reminder email...");
-
         const mailOptions = {
-          from: "Task Manager <" + process.env.EMAIL_USER + ">",
+          from: `Task Manager <${process.env.EMAIL_USER}>`,
           to: task.email,
-          subject: "⏰ Task Reminder - Deadline Approaching",
-          text: `
-Reminder: Your task deadline is approaching.
-
-Task: ${task.description}
-
-Deadline: ${taskDate} ${task.time}
-
-Please complete your task before the deadline.
-          `
+          subject: "⏰ Task Reminder – Deadline Approaching",
+          text: `Reminder: Your task deadline is approaching.\n\nTask: ${task.description}\nDeadline: ${taskDate} ${task.time}\n\nPlease complete it before the deadline.`,
         };
 
-        transporter.sendMail(mailOptions, (error, info) => {
-
-          if (error) {
-            console.log("Reminder email error:", error);
+        transporter.sendMail(mailOptions, (mailErr, info) => {
+          if (mailErr) {
+            console.error("Reminder email error:", mailErr);
           } else {
-
-            console.log("✅ Reminder email sent:", info.response);
-
-            db.query(
-              "UPDATE tasks SET reminder_sent = TRUE WHERE id = ?",
-              [task.id]
-            );
-
+            console.log("✅ Reminder sent:", info.response);
+            db.query("UPDATE tasks SET reminder_sent = TRUE WHERE id = ?", [task.id]);
           }
-
         });
-
       }
-
     });
-
-  });
-
-});
-// 🌍 Global Error Handler
-
-app.use((err, req, res, next) => {
-  console.error("Server Error:", err);
-  res.status(500).json({
-    success: false,
-    message: "Internal Server Error"
   });
 });
 
-
-
-app.listen(5000, () => {
-  console.log("🚀 Server running on http://localhost:5000");
-  console.log("✅ Successfully connected to MySQL database and started server");
+// ─── Start Server ──────────────────────────────────────────────────────────────
+const PORT = process.env.PORT || 5000;
+app.listen(PORT, () => {
+  console.log(`🚀 Server running on http://localhost:${PORT}`);
+  console.log(`📦 Environment: ${process.env.NODE_ENV || "development"}`);
 });

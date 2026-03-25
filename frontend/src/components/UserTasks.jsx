@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import Sidebar from "./Sidebar";
 import "../styles/UserTasks.css";
+import { apiFetch } from "../utils/api";
 
 function UserTasks() {
   const [users, setUsers] = useState([]);
@@ -9,24 +10,20 @@ function UserTasks() {
   const [loadingUsers, setLoadingUsers] = useState(true);
   const [loadingTasks, setLoadingTasks] = useState(false);
 
-  const token = localStorage.getItem("token");
   const role = localStorage.getItem("role");
 
   useEffect(() => {
-    if (role === "admin" && token) {
+    if (role === "admin") {
       fetchUsers();
     } else {
       setLoadingUsers(false);
     }
-  }, [role, token]);
+  }, [role]);
 
   const fetchUsers = async () => {
     setLoadingUsers(true);
     try {
-      const res = await fetch("http://localhost:5000/users", {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-      const data = await res.json();
+      const data = await apiFetch("/users");
       setUsers(data);
     } catch (err) {
       console.error("Failed to fetch users", err);
@@ -40,13 +37,9 @@ function UserTasks() {
     setLoadingTasks(true);
     setTasks([]);
     try {
-      const res = await fetch(`http://localhost:5000/tasks`, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-      const allTasks = await res.json();
+      const allTasks = await apiFetch("/tasks");
       const userTasks = allTasks.filter((task) => task.user_id === user.id);
-      const sortedTasks = sortTasksByPriority(userTasks);
-      setTasks(sortedTasks);
+      setTasks(sortTasksByPriority(userTasks));
     } catch (err) {
       console.error(`Failed to fetch tasks for user ${user.id}`, err);
     } finally {

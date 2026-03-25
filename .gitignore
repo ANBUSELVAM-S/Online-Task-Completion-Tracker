@@ -1,2 +1,40 @@
-git rm -cached .env.example
-git rm -cached .env
+.env
+.env.*
+*.env
+./env
+
+node_modules/
+dist/
+build/
+.next/
+out/
+
+# Vite
+.vite/
+
+
+_pycache_/
+*.py[cod]
+*.pyo
+*.pyd
+
+# Virtual environments
+venv/
+.venv/
+env/
+ENV/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# IDEs
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Document files
+*.pdf
+*.pptx
+*.docx

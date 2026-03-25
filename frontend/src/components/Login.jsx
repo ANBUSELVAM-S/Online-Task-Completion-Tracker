@@ -3,93 +3,59 @@ import "../styles/Login.css";
 import { useNavigate } from "react-router-dom";
 import { GoogleOAuthProvider, GoogleLogin } from "@react-oauth/google";
 import { jwtDecode } from "jwt-decode";
+import { apiFetch } from "../utils/api";
 
 const CLIENT_ID = "553832021727-dpmp3or6t2dl9bj3iot3040kbaie4cjq.apps.googleusercontent.com";
 
 function Login() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [message, setMessage] = useState({ text: "", type: "" });
   const navigate = useNavigate();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setMessage({ text: "Logging in...", type: "info" });
 
     try {
-      const response = await fetch("http://localhost:5000/login", {
+      const result = await apiFetch("/login", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email, password })
+        body: JSON.stringify({ email, password }),
       });
-
-      if (!response.ok) {
-        alert("Server error: " + response.status);
-        return;
-      }
-
-      let result;
-
-      try {
-        result = await response.json();
-      } catch {
-        alert("Invalid server response");
-        return;
-      }
 
       if (result.success) {
         localStorage.setItem("token", result.token);
         localStorage.setItem("user_id", result.user_id);
         localStorage.setItem("role", result.role);
-        localStorage.setItem("email", email);
+        localStorage.setItem("email", result.email || email);
         localStorage.setItem("loginTime", new Date().toLocaleString());
-        navigate("/dashboard");
-            setTimeout(() => {
-               alert("Login Successful!");
-            }, 1000);
 
-      } else {
-        alert(result.message || "Login failed");
+        setMessage({ text: "Login Successful!", type: "success" });
+        
+        setTimeout(() => {
+          navigate("/dashboard");
+        }, 1500);
       }
-
     } catch (err) {
       console.error("Login Error:", err);
-      alert("Server error");
+      setMessage({ text: err.message || "Login failed", type: "error" });
     }
   };
 
   const handleLoginSuccess = async (credentialResponse) => {
     try {
-      // ✅ Prevent crash if Google fails
       if (!credentialResponse?.credential) {
-        alert("Google login failed: No credential received");
+        setMessage({ text: "Google login failed: No credential received", type: "error" });
         return;
       }
-
+      setMessage({ text: "Verifying Google account...", type: "info" });
       const decoded = jwtDecode(credentialResponse.credential);
+      const googleUser = { email: decoded.email, google_id: decoded.sub };
 
-      const googleUser = {
-        email: decoded.email,
-        google_id: decoded.sub
-      };
-
-      const response = await fetch("http://localhost:5000/google-login", {
+      const result = await apiFetch("/google-login", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(googleUser)
+        body: JSON.stringify(googleUser),
       });
-
-      if (!response.ok) {
-        alert("Server error: " + response.status);
-        return;
-      }
-
-      let result;
-
-      try {
-        result = await response.json();
-      } catch {
-        alert("Invalid server response");
-        return;
-      }
 
       if (result.success) {
         localStorage.setItem("token", result.token);
@@ -97,23 +63,22 @@ function Login() {
         localStorage.setItem("role", result.role);
         localStorage.setItem("email", googleUser.email);
         localStorage.setItem("loginTime", new Date().toLocaleString());
-        navigate("/dashboard");
-            setTimeout(() => {
-               alert("Google Login Successful!");
-            }, 1000);
-      } else {
-        alert(result.message || "Google Login Failed");
-      }
 
+        setMessage({ text: "Google Login Successful!", type: "success" });
+        
+        setTimeout(() => {
+          navigate("/dashboard");
+        }, 1500);
+      }
     } catch (error) {
       console.error("Google Login Error:", error);
-      alert("Google Login Failed: " + error.message);
+      setMessage({ text: error.message || "Google Login Failed", type: "error" });
     }
   };
 
   const handleLoginError = (err) => {
     console.error("Google Login Failed:", err);
-    alert("Google Login Failed. Check console for details.");
+    setMessage({ text: "Google Login Failed. Check console for details.", type: "error" });
   };
 
   return (
@@ -121,6 +86,12 @@ function Login() {
       <div className="login-container">
         <form className="login-box" onSubmit={handleSubmit}>
           <h2 style={{ color: "white" }}>Login</h2>
+
+          {message.text && (
+            <div className={`login-message ${message.type}`}>
+              {message.text}
+            </div>
+          )}
 
           <input
             type="email"

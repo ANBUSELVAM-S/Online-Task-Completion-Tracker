@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import Sidebar from "./Sidebar";
 import Navbar from "./Navbar";
 import "../styles/Dashboard.css";
+import { apiFetch, clearSession } from "../utils/api";
 import AccountCircleIcon from '@mui/icons-material/AccountCircle';
 import CalendarMonthIcon from '@mui/icons-material/CalendarMonth';
 import AccessTimeIcon from '@mui/icons-material/AccessTime';
@@ -35,23 +36,15 @@ function Dashboard() {
   const userEmail = localStorage.getItem("email");
   const loginTime = localStorage.getItem("loginTime");
   const role = localStorage.getItem("role") || "user";
-  const token = localStorage.getItem("token");
 
   useEffect(() => {
-    if (token) {
-      fetchDashboardCounts();
-      fetchUpcomingTasks();
-    }
-  }, [token]);
+    fetchDashboardCounts();
+    fetchUpcomingTasks();
+  }, []);
 
   const fetchDashboardCounts = async () => {
     try {
-      const response = await fetch(
-        `http://localhost:5000/dashboard/counts`, {
-        headers: { "Authorization": `Bearer ${token}` }
-      }
-      );
-      const data = await response.json();
+      const data = await apiFetch("/dashboard/counts");
       setCounts(data);
     } catch (error) {
       console.error("Dashboard fetch error:", error);
@@ -60,19 +53,11 @@ function Dashboard() {
 
   const fetchUpcomingTasks = async () => {
     try {
-      const response = await fetch(`http://localhost:5000/tasks`, {
-        headers: { "Authorization": `Bearer ${token}` }
-      });
-      const data = await response.json();
+      const data = await apiFetch("/tasks");
       if (Array.isArray(data)) {
-        // Filter pending and sort by date/time
         const pending = data.filter(t => t.status === "pending");
-        pending.sort((a, b) => {
-          const dateA = new Date(`${a.date}T${a.time}`);
-          const dateB = new Date(`${b.date}T${b.time}`);
-          return dateA - dateB;
-        });
-        setUpcomingTasks(pending.slice(0, 4)); // Show top 4 upcoming
+        pending.sort((a, b) => new Date(`${a.date}T${a.time}`) - new Date(`${b.date}T${b.time}`));
+        setUpcomingTasks(pending.slice(0, 4));
       }
     } catch (error) {
       console.error("Tasks fetch error:", error);
@@ -151,8 +136,9 @@ function Dashboard() {
                 <p className="profile-time">🕒 Login: {loginTime}</p>
                 <button
                   className="logout-btn btn-danger"
-                  onClick={() => {
-                    localStorage.clear();
+                  onClick={async () => {
+                    try { await apiFetch("/logout", { method: "POST" }); } catch (_) {}
+                    clearSession();
                     navigate("/");
                   }}
                 >
