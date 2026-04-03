@@ -1,9 +1,13 @@
 require("dotenv").config();
 const express = require("express");
-const mysql = require("mysql2");
+const mongoose = require("mongoose");
 const cookieParser = require("cookie-parser");
 const nodemailer = require("nodemailer");
 const cron = require("node-cron");
+
+// ─── Models ──────────────────────────────────────────────────────────────────
+const Task = require("./models/Task");
+const User = require("./models/User");
 
 // ─── Middleware ────────────────────────────────────────────────────────────────
 const { applySecurity } = require("./middleware/security");
@@ -18,10 +22,7 @@ const dashboardRoutes = require("./routes/dashboardRoutes");
 const REQUIRED_ENV = [
   "JWT_SECRET",
   "REFRESH_TOKEN_SECRET",
-  "DB_HOST",
-  "DB_USER",
-  "DB_PASSWORD",
-  "DB_NAME",
+  "MONGODB_URI",
   "EMAIL_USER",
   "EMAIL_PASS",
   "ADMIN_EMAIL",
@@ -45,26 +46,14 @@ app.use(express.json({ limit: "10kb" }));         // Limit body size to prevent 
 app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
 
-// ─── Database (Connection Pool) ────────────────────────────────────────────────
-const db = mysql.createPool({
-  host: process.env.DB_HOST,
-  user: process.env.DB_USER,
-  password: process.env.DB_PASSWORD,
-  database: process.env.DB_NAME,
-  waitForConnections: true,
-  connectionLimit: 10,
-  queueLimit: 0,
-});
-
-// Verify DB connection on startup
-db.getConnection((err, connection) => {
-  if (err) {
-    console.error("❌ Database connection failed:", err.message);
+// ─── Database (MongoDB with Mongoose) ──────────────────────────────────────────
+mongoose
+  .connect(process.env.MONGODB_URI)
+  .then(() => console.log("✅ MongoDB connected successfully."))
+  .catch((err) => {
+    console.error("❌ MongoDB connection failed:", err.message);
     process.exit(1);
-  }
-  console.log("✅ MySQL database connected successfully.");
-  connection.release();
-});
+  });
 
 // ─── Nodemailer ────────────────────────────────────────────────────────────────
 const transporter = nodemailer.createTransport({
@@ -75,8 +64,7 @@ const transporter = nodemailer.createTransport({
   },
 });
 
-// ─── Share db & transporter via app locals ─────────────────────────────────────
-app.set("db", db);
+// ─── Share transporter via app locals ──────────────────────────────────────────
 app.set("transporter", transporter);
 
 // ─── Routes ───────────────────────────────────────────────────────────────────
@@ -110,50 +98,47 @@ app.use((err, req, res, _next) => {
 });
 
 // ─── Task Reminder Scheduler ───────────────────────────────────────────────────
-cron.schedule("* * * * *", () => {
-  const sql = `
-    SELECT t.id, t.description, t.date, t.time, u.email
-    FROM tasks t
-    JOIN users u ON t.user_id = u.id
-    WHERE t.status = 'pending'
-      AND (t.reminder_sent = FALSE OR t.reminder_sent IS NULL)
-  `;
-
-  db.query(sql, (err, tasks) => {
-    if (err) {
-      console.error("Reminder scheduler DB error:", err);
-      return;
-    }
+cron.schedule("* * * * *", async () => {
+  try {
+    const tasks = await Task.find({
+      status: "pending",
+      $or: [{ reminder_sent: false }, { reminder_sent: { $exists: false } }],
+    }).populate("user_id", "email");
 
     const now = new Date(new Date().toLocaleString("en-US", { timeZone: "Asia/Kolkata" }));
 
-    tasks.forEach((task) => {
-      const taskDate = new Date(task.date).toLocaleDateString("en-CA", {
+    for (const task of tasks) {
+      if (!task.user_id) continue;
+
+      const taskDateStr = new Date(task.date).toLocaleDateString("en-CA", {
         timeZone: "Asia/Kolkata",
       });
-      const deadline = new Date(`${taskDate}T${task.time}+05:30`);
-      const reminderTime = new Date(deadline.getTime() - 60 * 60 * 1000);
+      const deadline = new Date(`${taskDateStr}T${task.time}+05:30`);
+      const reminderTime = new Date(deadline.getTime() - 60 * 60 * 1000); // 1 hour before
 
       if (now >= reminderTime && now < deadline) {
         const mailOptions = {
           from: `Task Manager <${process.env.EMAIL_USER}>`,
-          to: task.email,
+          to: task.user_id.email,
           subject: "⏰ Task Reminder – Deadline Approaching",
-          text: `Reminder: Your task deadline is approaching.\n\nTask: ${task.description}\nDeadline: ${taskDate} ${task.time}\n\nPlease complete it before the deadline.`,
+          text: `Reminder: Your task deadline is approaching.\n\nTask: ${task.description}\nDeadline: ${taskDateStr} ${task.time}\n\nPlease complete it before the deadline.`,
         };
 
-        transporter.sendMail(mailOptions, (mailErr, info) => {
-          if (mailErr) {
-            console.error("Reminder email error:", mailErr);
-          } else {
-            console.log("✅ Reminder sent:", info.response);
-            db.query("UPDATE tasks SET reminder_sent = TRUE WHERE id = ?", [task.id]);
-          }
-        });
+        try {
+          await transporter.sendMail(mailOptions);
+          console.log(`✅ Reminder sent to: ${task.user_id.email}`);
+          task.reminder_sent = true;
+          await task.save();
+        } catch (mailErr) {
+          console.error("Reminder email error:", mailErr);
+        }
       }
-    });
-  });
+    }
+  } catch (err) {
+    console.error("Reminder scheduler error:", err);
+  }
 });
+
 
 // ─── Start Server ──────────────────────────────────────────────────────────────
 const PORT = process.env.PORT || 5000;

@@ -5,8 +5,7 @@ const { getDashboardCounts } = require("../controllers/userController");
 const { authenticateToken } = require("../middleware/auth");
 
 // GET /dashboard/counts – any authenticated user (admin sees all, user sees own)
-router.get("/counts", authenticateToken, (req, res) => {
-  return getDashboardCounts(req.app.get("db"))(req, res);
-});
+router.get("/counts", authenticateToken, getDashboardCounts);
+
 
 module.exports = router;

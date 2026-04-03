@@ -6,23 +6,16 @@ const { authenticateToken, requireAdmin } = require("../middleware/auth");
 const { validateRequest, addTaskRules } = require("../middleware/validation");
 
 // GET /tasks – any authenticated user
-router.get("/", authenticateToken, (req, res) => {
-  return getTasks(req.app.get("db"))(req, res);
-});
+router.get("/", authenticateToken, getTasks);
 
 // POST /tasks – admin only
-router.post("/", authenticateToken, requireAdmin, addTaskRules, validateRequest, (req, res) => {
-  return createTask(req.app.get("db"), req.app.get("transporter"))(req, res);
-});
+router.post("/", authenticateToken, requireAdmin, addTaskRules, validateRequest, createTask);
 
 // PUT /tasks/:id/complete – any authenticated user (controller enforces ownership)
-router.put("/:id/complete", authenticateToken, (req, res) => {
-  return completeTask(req.app.get("db"), req.app.get("transporter"))(req, res);
-});
+router.put("/:id/complete", authenticateToken, completeTask);
 
 // DELETE /tasks/:id – admin only
-router.delete("/:id", authenticateToken, requireAdmin, (req, res) => {
-  return deleteTask(req.app.get("db"))(req, res);
-});
+router.delete("/:id", authenticateToken, requireAdmin, deleteTask);
+
 
 module.exports = router;

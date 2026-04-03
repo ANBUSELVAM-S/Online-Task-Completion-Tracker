@@ -36,7 +36,7 @@ const addUserRules = [
 // ─── Add Task Rules ────────────────────────────────────────────────────────────
 const addTaskRules = [
   body("assigned_to")
-    .isInt({ min: 1 }).withMessage("Assigned user ID must be a valid positive integer."),
+    .isMongoId().withMessage("Assigned user ID must be a valid user."),
   body("date")
     .isISO8601().withMessage("Invalid date format. Use YYYY-MM-DD.")
     .toDate(),

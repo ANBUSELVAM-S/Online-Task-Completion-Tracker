@@ -9,23 +9,16 @@ const { authLimiter } = require("../middleware/security");
 router.use(authLimiter);
 
 // POST /login
-router.post("/login", loginRules, validateRequest, (req, res) => {
-  return login(req.app.get("db"))(req, res);
-});
+router.post("/login", loginRules, validateRequest, login);
 
 // POST /google-login
-router.post("/google-login", googleLoginRules, validateRequest, (req, res) => {
-  return googleLogin(req.app.get("db"))(req, res);
-});
+router.post("/google-login", googleLoginRules, validateRequest, googleLogin);
 
 // POST /refresh-token  – uses HttpOnly cookie
-router.post("/refresh-token", (req, res) => {
-  return refreshToken(req.app.get("db"))(req, res);
-});
+router.post("/refresh-token", refreshToken);
 
 // POST /logout
-router.post("/logout", (req, res) => {
-  return logout(req.app.get("db"))(req, res);
-});
+router.post("/logout", logout);
+
 
 module.exports = router;

@@ -50,10 +50,9 @@ const requireAdmin = (req, res, next) => {
   next();
 };
 
-// ─── Self or Admin Guard ───────────────────────────────────────────────────────
 // Allows a user to access their own resource, or admins to access any
 const requireSelfOrAdmin = (req, res, next) => {
-  const paramId = parseInt(req.params.id, 10);
+  const paramId = req.params.id; // MongoDB ObjectId as string
   if (req.user.role === "admin" || req.user.id === paramId) {
     return next();
   }
@@ -62,5 +61,6 @@ const requireSelfOrAdmin = (req, res, next) => {
     message: "Access denied. You can only access your own resources.",
   });
 };
+
 
 module.exports = { authenticateToken, requireAdmin, requireSelfOrAdmin };

@@ -1,6 +1,7 @@
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 const { sanitizeInput } = require("../utils/sanitization");
+const User = require("../models/User");
 
 const SECRET_KEY = process.env.JWT_SECRET;
 const REFRESH_SECRET = process.env.REFRESH_TOKEN_SECRET;
@@ -24,6 +25,7 @@ function generateTokens(user) {
   return { accessToken, refreshToken };
 }
 
+
 function setRefreshCookie(res, refreshToken) {
   res.cookie("refreshToken", refreshToken, {
     httpOnly: true,
@@ -34,7 +36,7 @@ function setRefreshCookie(res, refreshToken) {
 }
 
 // ─── POST /login ───────────────────────────────────────────────────────────────
-const login = (db) => async (req, res) => {
+const login = async (req, res) => {
   try {
     const rawEmail = req.body.email;
     const { password } = req.body;
@@ -56,44 +58,37 @@ const login = (db) => async (req, res) => {
       delete failedAttempts[email];
     }
 
-    db.query("SELECT * FROM users WHERE email = ?", [email], async (err, result) => {
-      if (err) {
-        console.error("DB error on login:", err);
-        return res.status(500).json({ success: false, message: "Server error. Please try again." });
-      }
+    const user = await User.findOne({ email });
 
-      if (result.length === 0) {
-        recordFail(email);
-        return res.status(401).json({ success: false, message: GENERIC_ERROR });
-      }
+    if (!user) {
+      recordFail(email);
+      return res.status(401).json({ success: false, message: GENERIC_ERROR });
+    }
 
-      const user = result[0];
-
-      if (user.password === "GOOGLE_USER") {
-        return res.status(400).json({
-          success: false,
-          message: "This account uses Google Sign-In. Please login with Google.",
-        });
-      }
-
-      const match = await bcrypt.compare(password, user.password);
-      if (!match) {
-        recordFail(email);
-        return res.status(401).json({ success: false, message: GENERIC_ERROR });
-      }
-
-      // Successful login — clear failed attempts
-      delete failedAttempts[email];
-      const { accessToken, refreshToken } = generateTokens(user);
-      setRefreshCookie(res, refreshToken);
-
-      return res.json({
-        success: true,
-        token: accessToken,
-        user_id: user.id,
-        role: user.role,
-        email: user.email,
+    if (user.password === "GOOGLE_USER") {
+      return res.status(400).json({
+        success: false,
+        message: "This account uses Google Sign-In. Please login with Google.",
       });
+    }
+
+    const match = await bcrypt.compare(password, user.password);
+    if (!match) {
+      recordFail(email);
+      return res.status(401).json({ success: false, message: GENERIC_ERROR });
+    }
+
+    // Successful login — clear failed attempts
+    delete failedAttempts[email];
+    const { accessToken, refreshToken } = generateTokens(user);
+    setRefreshCookie(res, refreshToken);
+
+    return res.json({
+      success: true,
+      token: accessToken,
+      user_id: user.id,
+      role: user.role,
+      email: user.email,
     });
   } catch (err) {
     console.error("Login controller error:", err);
@@ -102,71 +97,68 @@ const login = (db) => async (req, res) => {
 };
 
 // ─── POST /google-login ────────────────────────────────────────────────────────
-const googleLogin = (db) => (req, res) => {
-  const { email, google_id } = req.body;
-  const sanitizedEmail = sanitizeInput(email);
+const googleLogin = async (req, res) => {
+  try {
+    const { email, google_id } = req.body;
+    const sanitizedEmail = sanitizeInput(email);
 
-  db.query("SELECT * FROM users WHERE email = ?", [sanitizedEmail], (err, result) => {
-    if (err) {
-      console.error("Google login DB error:", err);
-      return res.status(500).json({ success: false, message: "Database error." });
-    }
+    let user = await User.findOne({ email: sanitizedEmail });
 
-    if (result.length > 0) {
-      const user = result[0];
+    if (user) {
       const { accessToken, refreshToken } = generateTokens(user);
       setRefreshCookie(res, refreshToken);
-      return res.json({ success: true, token: accessToken, user_id: user.id, role: user.role });
+      return res.json({ success: true, token: accessToken, user_id: user._id, role: user.role });
     }
 
-    db.query(
-      "INSERT INTO users (email, google_id, password) VALUES (?, ?, ?)",
-      [sanitizedEmail, google_id, "GOOGLE_USER"],
-      (err, insertResult) => {
-        if (err) {
-          console.error("Google login insert error:", err);
-          return res.status(500).json({ success: false, message: "Error creating account." });
-        }
-        const newUser = { id: insertResult.insertId, role: "user", email: sanitizedEmail };
-        const { accessToken, refreshToken } = generateTokens(newUser);
-        setRefreshCookie(res, refreshToken);
-        return res.json({
-          success: true,
-          token: accessToken,
-          user_id: newUser.id,
-          role: newUser.role,
-        });
-      }
-    );
-  });
+    // Create new user
+    user = new User({
+      email: sanitizedEmail,
+      google_id,
+      password: "GOOGLE_USER",
+      role: "user",
+    });
+
+    await user.save();
+
+    const { accessToken, refreshToken } = generateTokens(user);
+    setRefreshCookie(res, refreshToken);
+    return res.json({
+      success: true,
+      token: accessToken,
+      user_id: user.id,
+      role: user.role,
+    });
+  } catch (err) {
+    console.error("Google login error:", err);
+    return res.status(500).json({ success: false, message: "Server error." });
+  }
 };
 
 // ─── POST /refresh-token ───────────────────────────────────────────────────────
-const refreshToken = (db) => (req, res) => {
-  const token = req.cookies?.refreshToken;
-  if (!token) {
-    return res.status(401).json({ success: false, message: "No refresh token provided." });
-  }
-
-  jwt.verify(token, REFRESH_SECRET, (err, decoded) => {
-    if (err) {
-      return res.status(403).json({ success: false, message: "Invalid or expired refresh token." });
+const refreshToken = async (req, res) => {
+  try {
+    const token = req.cookies?.refreshToken;
+    if (!token) {
+      return res.status(401).json({ success: false, message: "No refresh token provided." });
     }
 
-    db.query("SELECT * FROM users WHERE id = ?", [decoded.id], (err, result) => {
-      if (err || result.length === 0) {
-        return res.status(403).json({ success: false, message: "User not found." });
-      }
-      const user = result[0];
-      const { accessToken, refreshToken: newRefreshToken } = generateTokens(user);
-      setRefreshCookie(res, newRefreshToken);
-      return res.json({ success: true, token: accessToken });
-    });
-  });
+    const decoded = jwt.verify(token, REFRESH_SECRET);
+    const user = await User.findById(decoded.id);
+
+    if (!user) {
+      return res.status(403).json({ success: false, message: "User not found." });
+    }
+
+    const { accessToken, refreshToken: newRefreshToken } = generateTokens(user);
+    setRefreshCookie(res, newRefreshToken);
+    return res.json({ success: true, token: accessToken });
+  } catch (err) {
+    return res.status(403).json({ success: false, message: "Invalid or expired refresh token." });
+  }
 };
 
 // ─── POST /logout ──────────────────────────────────────────────────────────────
-const logout = (_db) => (_req, res) => {
+const logout = (_req, res) => {
   res.clearCookie("refreshToken", {
     httpOnly: true,
     secure: process.env.NODE_ENV === "production",
