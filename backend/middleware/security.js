@@ -87,7 +87,7 @@ const applySecurity = (app) => {
 app.use(cors(corsOptions));
 
 // ✅ FIXED preflight handler
-app.options("/*", cors(corsOptions));
+
   // 🔥 CRITICAL FIX (handles preflight requests)
 
   // Rate limiting
