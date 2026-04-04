@@ -5,7 +5,7 @@
  * 3. Returns parsed JSON or throws a descriptive error.
  */
 
-const BASE_URL = "http://localhost:5000";
+const BASE_URL = "https://online-task-completion-tracker.onrender.com";
 
 /**
  * @param {string} endpoint  - Path, e.g. "/tasks"
