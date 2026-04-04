@@ -3,23 +3,29 @@ const rateLimit = require("express-rate-limit");
 const morgan = require("morgan");
 const cors = require("cors");
 
-// ─── CORS ──────────────────────────────────────────────────────────────────────
+// ─── Allowed Origins ──────────────────────────────────────────────────────────
 const allowedOrigins = [
   "http://localhost:5173",
   "http://localhost:3000",
+  "https://online-task-completion-tracker-gq4n.vercel.app",
+  "https://online-task-completion-tracker.onrender.com",
   process.env.FRONTEND_URL,
 ].filter(Boolean);
 
+// ─── CORS Options ─────────────────────────────────────────────────────────────
 const corsOptions = {
   origin: (origin, callback) => {
-    // Allow requests with no origin (e.g., mobile apps, Postman in dev)
-    if (!origin || allowedOrigins.includes(origin)) {
+    // Allow requests with no origin (Postman, mobile apps)
+    if (!origin) return callback(null, true);
+
+    if (allowedOrigins.includes(origin)) {
       callback(null, true);
     } else {
+      console.log("❌ Blocked by CORS:", origin);
       callback(new Error(`CORS policy: Origin ${origin} not allowed.`));
     }
   },
-  credentials: true,                   // Allow cookies (refresh token)
+  credentials: true,
   methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
   allowedHeaders: ["Content-Type", "Authorization"],
   optionsSuccessStatus: 200,
@@ -27,10 +33,10 @@ const corsOptions = {
 
 const isDev = process.env.NODE_ENV !== "production";
 
-// ─── Rate Limiters ─────────────────────────────────────────────────────────────
+// ─── Rate Limiters ────────────────────────────────────────────────────────────
 const globalLimiter = rateLimit({
   windowMs: 15 * 60 * 1000,
-  max: isDev ? 2000 : 200,     // Relaxed in dev so HMR doesn't trigger 429s
+  max: isDev ? 2000 : 200,
   standardHeaders: true,
   legacyHeaders: false,
   message: { success: false, message: "Too many requests. Please try again later." },
@@ -38,17 +44,16 @@ const globalLimiter = rateLimit({
 
 const authLimiter = rateLimit({
   windowMs: 15 * 60 * 1000,
-  max: isDev ? 50 : 10,        // Stricter in production to prevent brute-force
+  max: isDev ? 50 : 10,
   standardHeaders: true,
   legacyHeaders: false,
   message: { success: false, message: "Too many login attempts. Please try again in 15 minutes." },
-  skipSuccessfulRequests: true, // Only failed login attempts count against the limit
+  skipSuccessfulRequests: true,
 });
 
-
-// ─── Apply All Security Middleware ─────────────────────────────────────────────
+// ─── Apply Security Middleware ────────────────────────────────────────────────
 const applySecurity = (app) => {
-  // HTTP Security Headers
+  // Helmet (FIXED for cross-origin API calls)
   app.use(
     helmet({
       contentSecurityPolicy: {
@@ -57,26 +62,36 @@ const applySecurity = (app) => {
           scriptSrc: ["'self'"],
           styleSrc: ["'self'", "'unsafe-inline'"],
           imgSrc: ["'self'", "data:", "https:"],
-          connectSrc: ["'self'"],
+
+          // 🔥 VERY IMPORTANT FIX
+          connectSrc: [
+            "'self'",
+            "https://online-task-completion-tracker.onrender.com",
+            "https://online-task-completion-tracker-gq4n.vercel.app"
+          ],
+
           frameSrc: ["'none'"],
           objectSrc: ["'none'"],
         },
       },
-      crossOriginEmbedderPolicy: false,   // Needed for Google OAuth
+      crossOriginEmbedderPolicy: false,
       referrerPolicy: { policy: "strict-origin-when-cross-origin" },
     })
   );
 
-  // HTTP Request Logger
+  // Logger
   app.use(morgan(process.env.NODE_ENV === "production" ? "combined" : "dev"));
 
-  // CORS
+  // ✅ CORS
   app.use(cors(corsOptions));
 
-  // Global Rate Limit
+  // 🔥 CRITICAL FIX (handles preflight requests)
+  app.options("*", cors(corsOptions));
+
+  // Rate limiting
   app.use(globalLimiter);
 
-  // Trust proxy (needed for rate limiting behind Nginx/Render)
+  // Trust proxy (Render)
   app.set("trust proxy", 1);
 };
 
