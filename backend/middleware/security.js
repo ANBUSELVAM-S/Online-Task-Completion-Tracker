@@ -83,10 +83,12 @@ const applySecurity = (app) => {
   app.use(morgan(process.env.NODE_ENV === "production" ? "combined" : "dev"));
 
   // ✅ CORS
-  app.use(cors(corsOptions));
+ // CORS
+app.use(cors(corsOptions));
 
+// ✅ FIXED preflight handler
+app.options("/*", cors(corsOptions));
   // 🔥 CRITICAL FIX (handles preflight requests)
-  app.options("*", cors(corsOptions));
 
   // Rate limiting
   app.use(globalLimiter);
